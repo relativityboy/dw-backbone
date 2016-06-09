@@ -126,12 +126,12 @@ describe('Base.Model', function() {
         Model = Base.Model.extend({
           jsonMaps:{
             underS:{
-              to:{
+              from:{
                 convert:'toUnderscored'
               }
             },
             camelC:{
-              to:{
+              from:{
                 convert:'toCamel'
               }
             }
@@ -151,13 +151,14 @@ describe('Base.Model', function() {
             'banana':'grom'
           }
         };
-        model = new Model(attributes);
       });
       it("= 'toUnderscored' converts camelCase arguments to under_scored",function(){
-        expect(model.toJSON({},'underS').hasOwnProperty('object_one')).to.equal(true);
+        model = new Model(attributes, 'underS');
+        expect(model.attributes.hasOwnProperty('object_one')).to.equal(true);
       });
       it("= 'toCamel' converts under_scored arguments to camelCase",function(){
-        expect(model.toJSON({},'camelC').hasOwnProperty('objectTwo')).to.equal(true);
+        model = new Model(attributes, 'camelC');
+        expect(model.attributes.hasOwnProperty('objectTwo')).to.equal(true);
       });
     });
 
@@ -195,11 +196,43 @@ describe('Base.Model', function() {
 
   describe(".jsonMap.<mode>.to - transform .attributes of call to ModelInstance.toJSON(null, <mode>)", function() {
     describe(".convert - global attribute name transformation", function(){
+      var attributes, model, Model, undef;
+      before(function() {
+        Model = Base.Model.extend({
+          jsonMaps:{
+            underS:{
+              to:{
+                convert:'toUnderscored'
+              }
+            },
+            camelC:{
+              to:{
+                convert:'toCamel'
+              }
+            }
+          }
+        });
+      });
+      beforeEach(function() {
+        attributes = {
+          b:1,
+          c:'apple',
+          objectOne:{
+            'pear':'fruit',
+            'banana':'more fruit'
+          },
+          object_two:{
+            'pear':'glim',
+            'banana':'grom'
+          }
+        };
+        model = new Model(attributes);
+      });
       describe("= 'toUnderscored' converts camelCase attributes to under_scored", function(){
-        it("test stub", function(){});
+        expect(model.toJSON({},'underS').hasOwnProperty('object_one')).to.equal(true);
       });
       describe("= 'toCamel' converts under_scored attributes to camelCase",function(){
-        it("test stub", function(){});
+        expect(model.toJSON({},'camelC').hasOwnProperty('objectTwo')).to.equal(true);
       });
     });
 
