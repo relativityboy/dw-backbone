@@ -70,7 +70,7 @@ define([
               resp[key] = deepClone(prop);
               break;
             default :
-              resp[deepClone(key)] = prop;
+              resp[key] = prop;
           }
         });
         return resp;
@@ -280,11 +280,11 @@ define([
   //ROOT MODEL
   _exports.Model = Model = Backbone.Model.extend({
     constructor: function(attributes, mode) {
-      console.log("model constructor", this, arguments);
       if(this.jsonMaps.hasOwnProperty(mode)) {
         attributes = this.fromJSON(attributes, mode);
       }
       arguments[0] = attributes;
+      this._childModels = new _exports.Collection();
       Backbone.Model.apply(this, arguments);
 
     },
@@ -316,8 +316,8 @@ define([
         });
       }
     },
-    //_setCollections
-    _setSpecialAttributesCollections:[],
+    _set:{},
+    _setCollections:{},
     /**
      * this can be over-ridden by extending classes
      * @param attrs
@@ -325,50 +325,13 @@ define([
      * @returns {*}
      * @private
      */
-    _setSpecialAttributes:function(attrs) {
-      var i, attr;
-      /*this.makeFromDBJSONMap();
-      for(i in this.fromDBJSONMap) if(this.fromDBJSONMap.hasOwnProperty(i) && attrs.hasOwnProperty(i)) {
-        if (this.fromDBJSONMap[i].parse && (attrs[i].length > 0)) {
-          try {
-            attrs[this.fromDBJSONMap[i].attrName] = JSON.parse(attrs[i]);
-          } catch (e) {
-            console.log(this.defaults());
-            console.log(e.message, 'Failed to assign ' + this.fromDBJSONMap[i].attrName + "=" + attrs[i])
-          }
-
-        } else {
-          attrs[this.fromDBJSONMap[i].attrName] = attrs[i];
-        }
-        if (i !== this.fromDBJSONMap[i].attrName) {
-          delete attrs[i];
-        }
-      }
-      for(i in attrs) if(attrs.hasOwnProperty(i)) {
-        if(toCamel(i) !== i) {
-          attrs[toCamel(i)] = attrs[i];
-          delete attrs[i];
-        }
-      } */
-
-      for(attr in this._setSpecialAttributesCollections) if(this._setSpecialAttributesCollections.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
-        if(!this.attributes[attr] || this.attributes[attr].constructor !== this._setSpecialAttributesCollections[attr]) {
-          this.attributes[attr] = new this._setSpecialAttributesCollections[attr]();
-        }
-        if(attrs[attr].constructor === this._setSpecialAttributesCollections[attr]) {
-          console.log('warning: attempting to set backbone collection as attribute:' + attr + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
-          attrs[attr] = attrs[attr].models;
-        }
-        this.attributes[attr].set(attrs[attr]);//, {merge:true});
-        delete attrs[attr];
-        this.trigger('change:' + attr)
-      }
+    _setSpecial:function(attrs, options) {
       return attrs;
     },
     set: function (key, val, options) { //this function is MIT licensed from a 3rd party.
       // This first bit is what `set` does internally to deal with
       // the two possible argument formats.
-      var attrs;
+      var attrs, attr;
       if (typeof key === 'object') {
         attrs = key;
         options = val;
@@ -377,23 +340,38 @@ define([
       }
 
       if(attrs && attrs.parentModel) {
-
         if(this.parentModel && this.parentModel !== attrs.parentModel) {
-          this.removeParent();
+          if(this.parentModel._childModels) {
+            this.parentModel._childModels.remove(this);
+          }
         }
 
         this.parentModel = attrs.parentModel;
-        if(!this.parentModel._childModels) {
-          this.parentModel._childModels = new _export.Collection();
+        if(this.parentModel._childModels) {
+          this.parentModel._childModels.add(this);
         }
-        this.parentModel._childModels.add(this);
-
         delete attrs.parentModel;
       }
-      // Clean up the incoming key/value pairs.
-      if(typeof this._setSpecialAttributes === 'function') {
-        attrs = this._setSpecialAttributes(attrs, options);
+
+      for(attr in this._setCollections) if(this._setCollections.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
+        if(!this.attributes[attr] || this.attributes[attr].constructor !== this._setCollections[attr]) {
+          this.attributes[attr] = new this._setCollections[attr]();
+        }
+        if(attrs[attr].constructor === this._setCollections[attr]) {
+          console.log('warning: attempting to set backbone collection as attribute:' + attr + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
+          attrs[attr] = attrs[attr].models;
+        }
+        this.attributes[attr].set(attrs[attr]);//, {merge:true});
+        delete attrs[attr];
+        this.trigger('change:' + attr)
       }
+
+      for(attr in this._set) if(this._set.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
+        attrs[attr] = this._set[attr].call(this, attrs[attr], options);
+      }
+
+      // Clean up the incoming key/value pairs.
+      attrs = this._setSpecial(attrs, options);
 
       // And then punt to the standard Model#set
       return Backbone.Model.prototype.set.call(this, attrs, options);
