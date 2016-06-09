@@ -168,23 +168,55 @@ describe('Base', function() {
       });
     });
     describe(".logicallyIdentical", function() {
+      var obj1, obj2;
+      beforeEach(function() {
+        obj1 = {
+          'appleSauce':{
+            'isTasty':true,
+            'bitterBite':false
+          },
+          'grapefruitJuice':{
+            'robertFarthing':['mimi_roark']
+          }
+        };
+        obj2 = {
+          'appleSauce':{
+            'isTasty':true,
+            'bitterBite':false
+          },
+          'grapefruitJuice':{
+            'robertFarthing':['mimi_roark']
+          }
+        };
+      });
       it("exists", function() {
         expect(typeof Base.logicallyIdentical).to.equal('function');
       });
-      describe("compares simple items for equality", function() {
-        it("test stub", function(){});
+      it("compares simple items for equality", function() {
+        expect(Base.logicallyIdentical(1,1)).to.equal(true);
+        expect(Base.logicallyIdentical('apple','apple')).to.equal(true);
+        expect(Base.logicallyIdentical('pear','apple')).to.equal(false);
+        expect(Base.logicallyIdentical(true,false)).to.equal(false);
+
       });
-      describe("compares objects for logical equality", function() {
-        it("test stub", function(){});
+      it("compares objects for logical equality", function() {
+        expect(Base.logicallyIdentical({},{})).to.equal(true);
+        //nested
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(true);
+        obj2.grapefruitJuice = {
+          robertFarthing:2
+        };
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(false);
       });
-      describe("compares nested objects for equality", function() {
-        it("test stub", function(){});
+      it("compares arrays of simple items for equality", function() {
+        expect(Base.logicallyIdentical([1,2,3],[1,2,3])).to.equal(true);
+        expect(Base.logicallyIdentical([1,2,3],[1,2])).to.equal(false);
+        expect(Base.logicallyIdentical([1,3],[1,2,3])).to.equal(false);
+        expect(Base.logicallyIdentical([2,1,3],[1,2,3])).to.equal(false);
       });
-      describe("compares arrays of simple items for equality", function() {
-        it("test stub", function(){});
-      });
-      describe("compares arrays of nested objects for equality", function() {
-        it("test stub", function(){});
+      it("compares arrays of nested objects for equality", function() {
+        expect(Base.logicallyIdentical([obj1,obj2],[obj1,obj2])).to.equal(true);
+        expect(Base.logicallyIdentical([obj2,obj1],[obj1,obj2])).to.equal(false);
       });
     });
     describe(".cleanObject", function() {
