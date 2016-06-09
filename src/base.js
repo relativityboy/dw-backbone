@@ -1,16 +1,12 @@
 //todo: need to create the constructor function, and then create the new 'set' functionality.
 
-/*if (typeof define !== 'function') {
+if (typeof define !== 'function') {
  var define = require('amdefine')(module);
- _ = require('underscore');
- Backbone = require('backbone');
- BackboneValidation = require('backbone-validation');
  }
- */
 define([
   'underscore',
-  'backbone',
-  'backbone-validation'
+  'backbone'
+  //'backbone-validation'
 ], function(
   _,
   Backbone
@@ -26,7 +22,7 @@ define([
     cleanObject,
     logicallyIdentical;
 
-  _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
+ // _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
   //SUPPORT FUNCTIONS & VARIABLES
 
@@ -38,15 +34,16 @@ define([
     var type = typeof obj;
     switch(type) {
       case 'object' :
+        if(obj === null) {
+          return 'null';
+        }
         if(obj.constructor === Array) {
           return 'array';
         }
         if(obj.constructor === Date) {
           return 'date';
         }
-        if(obj === null) {
-          return 'null';
-        }
+
         break;
       case 'number' :
         if(isNaN(obj)) {
@@ -56,7 +53,7 @@ define([
     return type;
   };
 
-  _exports.passThru = passThru = function(val) {
+  _exports.deepClone = deepClone = function(val) {
     var resp;
     if(typeof val === 'undefined') {
       val = this;
@@ -70,10 +67,10 @@ define([
           switch(isA(prop)) {
             case 'object' :
             case 'array' :
-              resp[key] = passThru(prop);
+              resp[key] = deepClone(prop);
               break;
             default :
-              resp[passThru(key)] = prop;
+              resp[deepClone(key)] = prop;
           }
         });
         return resp;
@@ -150,14 +147,12 @@ define([
               resp[toUnderscored(key)] = toUnderscored(prop);
               break;
             default :
-              resp[toCamel(key)] = prop;
+              resp[toUnderscored(key)] = prop;
           }
         });
         return resp;
       case 'string' :
-        return val.replace(/(\_[a-z])/g, function ($1) {
-          return $1.toUpperCase().replace('_', '');
-        });
+        return val.replace(/([A-Z])/g, function($1){return "_"+$1.toLowerCase();});
     }
     return _.clone(val); //we clone, because every other behavior results in clone
   }
@@ -321,7 +316,7 @@ define([
         });
       }
     },
-
+    //_setCollections
     _setSpecialAttributesCollections:[],
     /**
      * this can be over-ridden by extending classes
@@ -332,7 +327,7 @@ define([
      */
     _setSpecialAttributes:function(attrs) {
       var i, attr;
-      this.makeFromDBJSONMap();
+      /*this.makeFromDBJSONMap();
       for(i in this.fromDBJSONMap) if(this.fromDBJSONMap.hasOwnProperty(i) && attrs.hasOwnProperty(i)) {
         if (this.fromDBJSONMap[i].parse && (attrs[i].length > 0)) {
           try {
@@ -354,7 +349,7 @@ define([
           attrs[toCamel(i)] = attrs[i];
           delete attrs[i];
         }
-      }
+      } */
 
       for(attr in this._setSpecialAttributesCollections) if(this._setSpecialAttributesCollections.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
         if(!this.attributes[attr] || this.attributes[attr].constructor !== this._setSpecialAttributesCollections[attr]) {
@@ -405,7 +400,7 @@ define([
     },
     jsonMaps:{},
     toJSON:function(options, mode) {
-      var keys = _.keys(this.attributes), map = {attrs:{}}, rsp = {}, rspAttrName, converter = passThru;
+      var keys = _.keys(this.attributes), map = {attrs:{}}, rsp = {}, rspAttrName, converter = deepClone;
       if(mode) {
         map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false; //['to' + mode + 'JSONMap'];
         map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
@@ -448,7 +443,7 @@ define([
       return rsp;
     },
     fromJSON:function(data, mode) {
-      var keys = _.keys(data), map = {inputs:{}}, rsp = {}, rspAttrName, converter = passThru;
+      var keys = _.keys(data), map = {inputs:{}}, rsp = {}, rspAttrName, converter = deepClone;
       if(mode) {
         map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false; //['to' + mode + 'JSONMap'];
         if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
@@ -629,7 +624,7 @@ jsonMaps = { //this, once supporting code is written defines mappings to &&|| fr
 
 /**
  toJSON = function(options, mode) { //this function is MIT licensed from a 3rd party.
-  var excludes, i, includes, keys = [], map, rsp = {}, rspAttrName, converter = passThru;
+  var excludes, i, includes, keys = [], map, rsp = {}, rspAttrName, converter = deepClone;
   if(mode) {
     map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false; //['to' + mode + 'JSONMap'];
     map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
