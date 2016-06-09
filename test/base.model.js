@@ -228,16 +228,47 @@ describe('Base.Model', function() {
         };
         model = new Model(attributes);
       });
-      describe("= 'toUnderscored' converts camelCase attributes to under_scored", function(){
+      it("= 'toUnderscored' converts camelCase attributes to under_scored", function(){
         expect(model.toJSON({},'underS').hasOwnProperty('object_one')).to.equal(true);
       });
-      describe("= 'toCamel' converts under_scored attributes to camelCase",function(){
+      it("= 'toCamel' converts under_scored attributes to camelCase",function(){
         expect(model.toJSON({},'camelC').hasOwnProperty('objectTwo')).to.equal(true);
       });
     });
 
-    describe(".exclude keeps specified attributes from being added to the output json",function(){
-      it("test stub", function(){});
+    describe(".exclude",function(){
+      var attributes, model, Model, undef;
+      before(function() {
+        Model = Base.Model.extend({
+          jsonMaps:{
+            excl:{
+              to:{
+                exclude:['b','object_two', 'objectOne']
+              }
+            }
+          }
+        });
+      });
+      beforeEach(function() {
+        attributes = {
+          b:1,
+          c:'apple',
+          objectOne:{
+            'pear':'fruit',
+            'banana':'more fruit'
+          },
+          object_two:{
+            'pear':'glim',
+            'banana':'grom'
+          }
+        };
+        model = new Model(attributes);
+      });
+      it("keeps specified attributes from being added to the output json", function(){
+        var json = model.toJSON('excl');
+        var jsonTest = {c:'apple'};
+        expect(json).to.deep.equal(jsonTest);
+      });
     });
     describe(".include allows only the specified attributes to be added to the output json",function(){
       it("test stub", function(){});

@@ -378,7 +378,11 @@ define([
     },
     jsonMaps:{},
     toJSON:function(options, mode) {
-      var keys = _.keys(this.attributes), map = {attrs:{}}, rsp = {}, rspAttrName, converter = deepClone;
+      if(typeof options === 'string' && typeof mode == 'undefined') {
+        console.log("options:", options)
+        mode = options;
+      }
+      var keys, map = {attrs:{}}, rsp = {}, rspAttrName, converter = deepClone;
       if(mode) {
         map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false; //['to' + mode + 'JSONMap'];
         map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
@@ -389,17 +393,25 @@ define([
         if (map.include) {
           keys = map.include;
         } else if (map.exclude) {
+          keys = [];
+          console.log("found exclude", map.exclude)
           for (var key in this.attributes) if (this.attributes.hasOwnProperty(key)) {
             if (map.exclude.indexOf(key) == -1) {
+              console.log(key, map.exclude.indexOf(key))
               keys.push(key)
             }
           }
+          console.log(keys);
+        } else {
+          keys =  _.keys(this.attributes);
         }
         if (map.convert === 'toCamel') {
           converter = toCamel;
         } else if (map.convert == 'toUnderscored') {
           converter = toUnderscored;
         }
+      } else {
+        keys = _.keys(this.attributes);
       }
       _.each(keys, function(key) {
         rspAttrName = (map.attrs[key] && map.attrs[key].fieldName) ? map.attrs[key].fieldName : converter(key);
