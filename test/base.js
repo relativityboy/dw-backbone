@@ -196,7 +196,6 @@ describe('Base', function() {
         expect(Base.logicallyIdentical(1,1)).to.equal(true);
         expect(Base.logicallyIdentical('apple','apple')).to.equal(true);
         expect(Base.logicallyIdentical('pear','apple')).to.equal(false);
-        expect(Base.logicallyIdentical(true,false)).to.equal(false);
 
       });
       it("compares objects for logical equality", function() {
@@ -215,6 +214,7 @@ describe('Base', function() {
         expect(Base.logicallyIdentical([2,1,3],[1,2,3])).to.equal(false);
       });
       it("compares arrays of nested objects for equality", function() {
+        obj2.grapefruitJuice.loopl = [];
         expect(Base.logicallyIdentical([obj1,obj2],[obj1,obj2])).to.equal(true);
         expect(Base.logicallyIdentical([obj2,obj1],[obj1,obj2])).to.equal(false);
       });
