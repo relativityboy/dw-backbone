@@ -121,11 +121,43 @@ describe('Base.Model', function() {
 
   describe(".jsonMap.<mode>.from - transform input {...} on 'new Base.Model({...}, <mode>)'", function() {
     describe(".convert - global attribute name transformation",function(){
-      describe("= 'toUnderscored' converts camelCase arguments to under_scored",function(){
-        it("test stub", function(){});
+      var attributes, model, Model, undef;
+      before(function() {
+        Model = Base.Model.extend({
+          jsonMaps:{
+            underS:{
+              to:{
+                convert:'toUnderscored'
+              }
+            },
+            camelC:{
+              to:{
+                convert:'toCamel'
+              }
+            }
+          }
+        });
       });
-      describe("= 'toCamel' converts under_scored arguments to camelCase",function(){
-        it("test stub", function(){});
+      beforeEach(function() {
+        attributes = {
+          b:1,
+          c:'apple',
+          objectOne:{
+            'pear':'fruit',
+            'banana':'more fruit'
+          },
+          object_two:{
+            'pear':'glim',
+            'banana':'grom'
+          }
+        };
+        model = new Model(attributes);
+      });
+      it("= 'toUnderscored' converts camelCase arguments to under_scored",function(){
+        expect(model.toJSON({},'underS').hasOwnProperty('object_one')).to.equal(true);
+      });
+      it("= 'toCamel' converts under_scored arguments to camelCase",function(){
+        expect(model.toJSON({},'camelC').hasOwnProperty('objectTwo')).to.equal(true);
       });
     });
 
@@ -162,8 +194,8 @@ describe('Base.Model', function() {
   });
 
   describe(".jsonMap.<mode>.to - transform .attributes of call to ModelInstance.toJSON(null, <mode>)", function() {
-    describe(".convert - global attribute name transformation",function(){
-      describe("= 'toUnderscored' converts camelCase attributes to under_scored",function(){
+    describe(".convert - global attribute name transformation", function(){
+      describe("= 'toUnderscored' converts camelCase attributes to under_scored", function(){
         it("test stub", function(){});
       });
       describe("= 'toCamel' converts under_scored attributes to camelCase",function(){
