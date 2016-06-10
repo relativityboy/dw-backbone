@@ -221,6 +221,7 @@ define([
    * @param item1 - item to be compare with item2
    * @param item2 - item to be compared with item 1
    * @param ignoreTree - an object tree of properties to be ignored. value of properties must be boolean 'true', or and object with child properties to be ignored.
+   *                     **please note arrays must be ignored in their entirity. Individual items in arrays cannot be ignored @ this time.
    * @returns {boolean}
    */
   _exports.logicallyIdentical = logicallyIdentical = function(item1, item2, ignoreTree) {

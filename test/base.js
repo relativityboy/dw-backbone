@@ -218,6 +218,19 @@ describe('Base', function() {
         expect(Base.logicallyIdentical([obj1,obj2],[obj1,obj2])).to.equal(true);
         expect(Base.logicallyIdentical([obj2,obj1],[obj1,obj2])).to.equal(false);
       });
+      it("ignores attributes in a shallow ignoreTree", function() {
+        obj1.a = 1;
+        obj2.a = 2;
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(false);
+        expect(Base.logicallyIdentical(obj1,obj2, {a:true})).to.equal(true);
+      });
+      it("ignores attributes in a deep ignoreTree", function() {
+        obj1.appleSauce.isTasty = 'butter';
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(false);
+        expect(Base.logicallyIdentical(obj1,obj2, {appleSauce:{isTasty:true}})).to.equal(true);
+        obj1.grapefruitJuice.robertFarthing[0] = 'alpha';
+        expect(Base.logicallyIdentical(obj1,obj2, {appleSauce:{isTasty:true},grapefruitJuice:{robertFarthing:true}})).to.equal(true);
+      });
     });
     describe(".cleanObject", function() {
       it("exists", function() {
