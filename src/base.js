@@ -329,6 +329,7 @@ define([
     _setSpecial:function(attrs, options) {
       return attrs;
     },
+    
     set: function (key, val, options) { //this function is MIT licensed from a 3rd party.
       // This first bit is what `set` does internally to deal with
       // the two possible argument formats.
@@ -377,10 +378,10 @@ define([
       // And then punt to the standard Model#set
       return Backbone.Model.prototype.set.call(this, attrs, options);
     },
+    
     jsonMaps:{},
     toJSON:function(options, mode) {
       if(typeof options === 'string' && typeof mode == 'undefined') {
-        console.log("options:", options)
         mode = options;
       }
       var keys, map = {attrs:{}}, rsp = {}, rspAttrName, converter = deepClone;
@@ -395,14 +396,11 @@ define([
           keys = map.include;
         } else if (map.exclude) {
           keys = [];
-          console.log("found exclude", map.exclude)
           for (var key in this.attributes) if (this.attributes.hasOwnProperty(key)) {
             if (map.exclude.indexOf(key) == -1) {
-              console.log(key, map.exclude.indexOf(key))
               keys.push(key)
             }
           }
-          console.log(keys);
         } else {
           keys =  _.keys(this.attributes);
         }
@@ -433,6 +431,7 @@ define([
 
       return rsp;
     },
+    
     fromJSON:function(data, mode) {
       var keys = _.keys(data), map = {inputs:{}}, rsp = {}, rspAttrName, converter = deepClone;
       if(mode) {
@@ -505,7 +504,6 @@ define([
       });
       return this;
     },
-
     callOnAll:function(fnName, options) {
       this.each(function(model) {
         model[fnName](options);
