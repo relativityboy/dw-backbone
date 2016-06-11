@@ -433,9 +433,9 @@ define([
     },
     
     fromJSON:function(data, mode) {
-      var keys = _.keys(data), map = {inputs:{}}, rsp = {}, rspAttrName, converter = deepClone;
+      var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = deepClone;
       if(mode) {
-        map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false; //['to' + mode + 'JSONMap'];
+        map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false;
         if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
           throw new Error('fromJSON mode:' + mode + ' does not have a map (jsonMaps.' + mode + '.from) for all models in the tree being Jsonified');
         }
@@ -444,11 +444,14 @@ define([
         if (map.include) {
           keys = map.include;
         } else if (map.exclude) {
+          keys = [];
           for (var key in data) if (data.hasOwnProperty(key)) {
             if (map.exclude.indexOf(key) == -1) {
               keys.push(key)
             }
           }
+        } else {
+          keys = _.keys(data);
         }
 
         if (map.convert === 'toCamel') {
@@ -456,6 +459,8 @@ define([
         } else if (map.convert == 'toUnderscored') {
           converter = toUnderscored;
         }
+      } else {
+        keys = _.keys(data);
       }
       _.each(keys, function(key) {
         rspAttrName = (map.inputs[key] && map.inputs[key].attrName) ? map.inputs[key].attrName : converter(key);

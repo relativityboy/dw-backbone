@@ -44,15 +44,42 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
       expect(model.attributes.hasOwnProperty('objectTwo')).to.equal(true);
     });
   });
-
-  describe(".exclude keeps specified attributes from being added to the model",function(){
-    it("test stub", function(){});
+  describe(".exclude", function() {
+    it("keeps specified attributes from being added to the model",function(){
+      var Model = Base.Model.extend({
+        jsonMaps:{
+          excl:{
+            from:{
+              exclude:['objectOne', 'object_two', 'a']
+            }
+          }
+        }
+      });
+      var model = new Model({
+        b:1,
+        c:'apple',
+        objectOne:{
+          'pear':'fruit',
+          'banana':'more fruit'
+        },
+        object_two:{
+          'pear':'glim',
+          'banana':'grom'
+        }
+      }, 'excl');
+      expect(model.attributes.hasOwnProperty('object_two')).to.equal(false);
+      expect(model.attributes.hasOwnProperty('objectOne')).to.equal(false);
+      expect(model.attributes.hasOwnProperty('c')).to.equal(true);
+      expect(model.attributes.hasOwnProperty('b')).to.equal(true);
+    });
   });
-  describe(".include allows only the specified attributes from being added to the model",function(){
-    it("test stub", function(){});
-  });
-  describe(".include with .exclude also specced ignores .exclude",function(){
-    it("test stub", function(){});
+  describe(".include", function() {
+    describe("allows only the specified attributes to be added to the model",function(){
+      it("test stub", function(){});
+    });
+    describe("with .exclude also specced ignores .exclude",function(){
+      it("test stub", function(){});
+    });
   });
   describe(".inputs.<inputName> - transforming specific attributes ",function(){
     describe(".attrName assigns attr <inputName> to value of attrName",function(){
