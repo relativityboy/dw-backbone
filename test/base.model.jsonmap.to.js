@@ -1,3 +1,7 @@
+var Base      = require('../src/base');
+var expect    = require("chai").expect;
+var _         = require('underscore');
+
 describe("Base.Model.jsonMap.<mode>.to - transform .attributes of call to ModelInstance.toJSON(<mode>)", function() {
   describe(".convert - global attribute name transformation", function(){
     var attributes, model, Model, undef;
