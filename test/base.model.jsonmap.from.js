@@ -74,11 +74,51 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
     });
   });
   describe(".include", function() {
-    describe("allows only the specified attributes to be added to the model",function(){
-      it("test stub", function(){});
+    var attributes, model, Model, undef;
+    before(function() {
+      Model = Base.Model.extend({
+        jsonMaps:{
+          incl:{
+            from:{
+              include:['object_two', 'c']
+            }
+          },
+          inclExcl:{
+            from:{
+              include:['objectOne'],
+              exclude:['objectOne', 'object_two', 'a']
+            }
+          }
+        }
+      });
     });
-    describe("with .exclude also specced ignores .exclude",function(){
-      it("test stub", function(){});
+    beforeEach(function() {
+      attributes = {
+        b:1,
+        c:'apple',
+        objectOne:{
+          'pear':'fruit',
+          'banana':'more fruit'
+        },
+        object_two:{
+          'pear':'glim',
+          'banana':'grom'
+        }
+      };
+    });
+    it("allows only the specified attributes to be added to the model",function(){
+      model = new Model(attributes, 'incl');
+      expect(model.attributes.hasOwnProperty('object_two')).to.equal(true);
+      expect(model.attributes.hasOwnProperty('c')).to.equal(true);
+      expect(model.attributes.hasOwnProperty('objectOne')).to.equal(false);
+      expect(model.attributes.hasOwnProperty('b')).to.equal(false);
+    });
+    it("with .exclude also specced ignores .exclude",function(){
+      model = new Model(attributes, 'inclExcl');
+      expect(model.attributes.hasOwnProperty('object_two')).to.equal(false);
+      expect(model.attributes.hasOwnProperty('c')).to.equal(false);
+      expect(model.attributes.hasOwnProperty('objectOne')).to.equal(true);
+      expect(model.attributes.hasOwnProperty('b')).to.equal(false);
     });
   });
   describe(".inputs.<inputName> - transforming specific attributes ",function(){
