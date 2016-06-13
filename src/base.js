@@ -487,14 +487,6 @@ define([
   //ROOT COLLECTION
   Collection = _exports.Collection = Backbone.Collection.extend({
     model:Model,
-    toHubApiJSON:function(options) {
-      var i, model, rsp = [];
-      for(i = 0; i < this.length; i++) {
-        model = this.at(i);
-        rsp.push(model.toHubApiJSON(options));
-      }
-      return rsp;
-    },
     toJSON:function(options, mode) {
       var i, model, rsp = [];
       for(i = 0; i < this.length; i++) {
