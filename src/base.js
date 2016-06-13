@@ -280,9 +280,16 @@ define([
 
   //ROOT MODEL
   _exports.Model = Model = Backbone.Model.extend({
-    constructor: function(attributes, mode) {
-      if(this.jsonMaps.hasOwnProperty(mode)) {
-        attributes = this.fromJSON(attributes, mode);
+    constructor: function(attributes, options) {
+      switch(_exports.isA(options)) {
+        case 'string' :
+          options = {mode:options};
+          break;
+        case 'undefined' :
+          options = {mode:false};
+      }
+      if(this.jsonMaps.hasOwnProperty(options.mode)) {
+        attributes = this.fromJSON(attributes, options.mode);
       }
       arguments[0] = attributes;
       this._childModels = new _exports.Collection();
@@ -381,6 +388,7 @@ define([
     
     jsonMaps:{},
     toJSON:function(options, mode) {
+
       if(typeof options === 'string' && typeof mode == 'undefined') {
         mode = options;
       }
@@ -404,11 +412,16 @@ define([
         } else {
           keys =  _.keys(this.attributes);
         }
-        if (map.convert === 'toCamel') {
-          converter = toCamel;
-        } else if (map.convert == 'toUnderscored') {
-          converter = toUnderscored;
+        if(map.convert) {
+          if (map.convert === 'toCamel') {
+            converter = toCamel;
+          } else if (map.convert == 'toUnderscored') {
+            converter = toUnderscored;
+          } else {
+            console.log('warning: invalid attribute name converter "' + map.convert + '" specified')
+          }
         }
+
       } else {
         keys = _.keys(this.attributes);
       }
@@ -487,11 +500,18 @@ define([
   //ROOT COLLECTION
   Collection = _exports.Collection = Backbone.Collection.extend({
     model:Model,
+    constructor:function(json, options) {
+      if(typeof options === 'string') {
+        arguments[1] = {mode: options};
+      }
+      Backbone.Collection.apply(this, arguments);
+    },
     toJSON:function(options, mode) {
       var i, model, rsp = [];
       for(i = 0; i < this.length; i++) {
         model = this.at(i);
-        rsp.push(model.toJSON(options, mode));
+
+        rsp.push(model.toJSON.apply(model, arguments));
       }
       return rsp;
     },
