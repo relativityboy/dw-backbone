@@ -1,12 +1,12 @@
 {
   "name": "dw-backbone",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
-  "main": "index.js",
+  "main": "src/base.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
-  "author": "",
+  "author": "Donovan Walker",
   "license": "MIT",
   "dependencies": {
     "amdefine": "^1.0.0",

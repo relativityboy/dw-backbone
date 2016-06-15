@@ -292,7 +292,6 @@ define([
         attributes = this.fromJSON(attributes, options.mode);
       }
       arguments[0] = attributes;
-      this._childModels = new _exports.Collection();
       Backbone.Model.apply(this, arguments);
 
     },
@@ -323,6 +322,17 @@ define([
           view.remove();
         });
       }
+      for(var i in this.attributes) if(this.hasOwnProperty(i)) {
+        if(((this.attributes[i] instanceof Backbone.Model) == true) || ((this.attributes[i] instanceof _export.Collection) == true)) {
+          try {
+            this.attributes[i].dispose();
+          } catch (e) {
+            console.log('When disposing of', this, 'child model .' + i, this.attributes[i], 'did not have dispose function')
+          }
+        }
+      }
+      this.removeParent();
+      this.trigger('dispose', this);
     },
     _set:{},
     _setCollections:{},
@@ -350,15 +360,14 @@ define([
 
       if(attrs && attrs.parentModel) {
         if(this.parentModel && this.parentModel !== attrs.parentModel) {
-          if(this.parentModel._childModels) {
-            this.parentModel._childModels.remove(this);
-          }
+          this.removeParent();
         }
 
         this.parentModel = attrs.parentModel;
-        if(this.parentModel._childModels) {
-          this.parentModel._childModels.add(this);
+        if(!this.parentModel._childModels) {
+          this.parentModel._childModels = new _exports.Collection();
         }
+        this.parentModel._childModels.add(this);
         delete attrs.parentModel;
       }
 
@@ -370,7 +379,10 @@ define([
           console.log('warning: attempting to set backbone collection as attribute:' + attr + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
           attrs[attr] = attrs[attr].models;
         }
-        this.attributes[attr].set(attrs[attr]);//, {merge:true});
+        if(this._set.hasOwnProperty(attr)) {
+          attrs[attr] = this._set[attr].call(this, attrs[attr], options);
+        }
+        this.attributes[attr].set(attrs[attr])//, {merge:true});
         delete attrs[attr];
         this.trigger('change:' + attr)
       }
@@ -385,7 +397,19 @@ define([
       // And then punt to the standard Model#set
       return Backbone.Model.prototype.set.call(this, attrs, options);
     },
-    
+    /**
+     * If this model has a parent, parentModel removes any parent/child relationship that exists
+     * @param parentModel  - optional - If undefined will use this model's parent if defined.
+     */
+    removeParent:function(parentModel) {
+      if(this.parentModel && (this.parentModel === parentModel || typeof parentModel === 'undefined')) {
+        this.parentModel.off(null, null, this);
+        if (this.parentModel && this.parentModel._childModels) {
+          this.parentModel._childModels.remove(this); //we assume every model extends Base.Model or a child thereof
+        }
+        delete this.parentModel
+      }
+    },
     jsonMaps:{},
     toJSON:function(options, mode) {
 
@@ -565,9 +589,13 @@ define([
       //this is a no-op, 
     },
     setModel:function(model) {
-      if(this.model) {
-        this.unstickit();
-        this.setModelAfterUnstickit(model);
+      this.unsetModel();
+      if(model) {
+        if(model) {
+          this.model = model;
+          this.bindModel();
+        }
+        /* this.setModelAfterUnstickit(model);
         if(this.setViewOnModel && this.model.views) {
           for(var i = 0; i < this.model.views.length; i++) {
             if(this === this.model.views[i]) {
@@ -575,7 +603,7 @@ define([
               break;
             }
           }
-        }
+        } */
       }
       this.model = model;
       if(typeof this.setViewOnModel === 'function') {
@@ -584,6 +612,17 @@ define([
       this.setModelBeforeStickit(model);
       this.stickit();
       return this;
+    },
+    bindModel:function() {
+      throw new Error('View must implement bindModel');
+    },
+    unsetModel: function() {
+      if(this.model) {
+        this.model.off(null, null, this);
+        this.unstickit();
+        this.disposeChildViews();
+        delete this.model;
+      }
     },
     remove:function() {
       if(this.model && this.model.views) {

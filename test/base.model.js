@@ -41,12 +41,27 @@ describe('Base.Model', function() {
     var attributes, model, Model, undef;
     before(function() {
       Model = Base.Model.extend({
+        _setCollections:{
+          collection:Backbone.Collection.extend({model:Backbone.Model.extend({idAttribute:'id'})})
+        },
         _set:{
           'a':function(val) {
             if(val) {
               return true;
             }
             return false;
+          },
+          'collection':function(val) {
+            if(val.constructor !== Array) {
+              val = [val]
+            }
+            _.each(val, function(v, i) {
+              if(typeof v == 'string') {
+                val[i] = {id:1, 'name':v}
+              }
+            })
+
+            return val;
           }
         }
       });
@@ -58,15 +73,6 @@ describe('Base.Model', function() {
       var parentModel = new Base.Model();
       model.set('parentModel',parentModel);
       expect(parentModel).to.equal(model.parentModel);
-    });
-    it("on set parentModel, _childModels is set only if it exists", function() {
-      var parentModel = new Base.Model();
-      model.set('parentModel',parentModel);
-      expect(model).to.equal(parentModel._childModels.at(0));
-
-      parentModel = new Backbone.Model();
-      model.set('parentModel',parentModel);
-      expect(parentModel.hasOwnProperty('_childModels')).to.equal(false);
     });
     it("on set different parentModel, child model is removed from parentModel._childModels", function() {
       var parentModel = new Base.Model();
@@ -86,6 +92,19 @@ describe('Base.Model', function() {
       var date = new Date();
       model.set('b', date);
       expect(model.get('b')).to.equal(date);
+    });
+    it("uses _set.<attrName> in conjunction with _setCollection", function() {
+      expect(model.get('collection')).to.equal(undef);
+      model.set('collection', "grom");
+      expect(model.get('collection').length).to.equal(1);
+      expect(model.get('collection').at(0).get('name')).to.equal('grom');
+
+      model.set('collection', {id:2, 'boo':3});
+      expect(model.get('collection').length).to.equal(1);
+
+      model.set('collection', ["grom", {id:2, 'boo':3}]);
+      expect(model.get('collection').length).to.equal(2);
+
     });
   });
   describe(".toJSON", function() {
