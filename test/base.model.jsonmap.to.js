@@ -237,4 +237,8 @@ describe("Base.Model.jsonMap.<mode>.to - transform .attributes of call to ModelI
       });
     });
   });
+
+  describe("jsonMap._.to automatically used if present and no mode is passed to toJSON()", function() {
+    it("stub", function(){})
+  });
 });

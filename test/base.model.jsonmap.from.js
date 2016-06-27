@@ -195,4 +195,7 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
       expect(model).to.equal(thisModel);
     });
   });
+  describe("jsonMap._.from automatically used if present and no mode is passed to the constructor", function() {
+    it("stub", function(){})
+  });
 });

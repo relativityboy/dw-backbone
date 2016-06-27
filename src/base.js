@@ -6,7 +6,6 @@ if (typeof define !== 'function') {
 define([
   'underscore',
   'backbone'
-  //'backbone-validation'
 ], function(
   _,
   Backbone
@@ -417,7 +416,9 @@ define([
         mode = options;
       }
       var keys, map = {attrs:{}}, rsp = {}, rspAttrName, converter = deepClone;
-      if(mode) {
+      mode = (mode)? mode : '_';
+
+      if((mode !== '_') || (mode === '_' && this.jsonMaps.hasOwnProperty('_') && this.jsonMaps._.hasOwnProperty('to'))) {
         map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false; //['to' + mode + 'JSONMap'];
         map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
         if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
@@ -470,7 +471,10 @@ define([
     },
     
     fromJSON:function(data, mode) {
-      var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = deepClone;
+      var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = function(val) { return val};;
+      if(!mode && this.jsonMaps.hasOwnProperty('_') && this.jsonMaps._.hasOwnProperty('from')) {
+        mode = '_';
+      }
       if(mode) {
         map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false;
         if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
@@ -558,7 +562,7 @@ define([
       return this;
     }
   });
-
+/** No tests for the following yet. Still fleshing out ideas.
   //ROOT VIEW
   View = _exports.View = Backbone.View.extend({
     '$elf':function(cssExpr) {
@@ -575,7 +579,7 @@ define([
      * extending views can implement this function if there are children or special operations to be done before
      * just after unstickit() is called
      * @param model
-     */
+     * /
     setModelAfterUnstickit:function(model) {
       //this is a no-op, extending views can implement this function if there are children
     },
@@ -584,7 +588,7 @@ define([
      * extending views can implement this function if there are children or special operations to be done before
      * before stickit() is called
      * @param model
-     */
+     * /
     setModelBeforeStickit:function(model) {
       //this is a no-op, 
     },
@@ -603,7 +607,7 @@ define([
               break;
             }
           }
-        } */
+        } * /
       }
       this.model = model;
       if(typeof this.setViewOnModel === 'function') {
@@ -635,10 +639,10 @@ define([
       }
       Backbone.View.prototype.remove.call(this);
     }
-  });
+  }); */
   return _exports;
 });
-
+/*
 ///
 jsonMaps = { //this, once supporting code is written defines mappings to &&|| from an object format.
   DB:{
@@ -666,53 +670,4 @@ jsonMaps = { //this, once supporting code is written defines mappings to &&|| fr
     }
   }
 }
-
-/**
- toJSON = function(options, mode) { //this function is MIT licensed from a 3rd party.
-  var excludes, i, includes, keys = [], map, rsp = {}, rspAttrName, converter = deepClone;
-  if(mode) {
-    map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false; //['to' + mode + 'JSONMap'];
-    map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
-    if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
-      throw new Error('toUnderScoredJSON mode:' + mode + ' does not have a map (.to' + mode + 'JSONMap) for all models in the tree being Jsonified');
-    }
-
-    if (map.include) {
-      keys = map.include;
-    } else if (map.exclude) {
-      for (var key in this.attributes) if (this.attributes.hasOwnProperty(key)) {
-        if (map.exclude.indexOf(i) == -1) {
-          keys.push(key)
-        }
-      }
-    } else {
-      keys = _.keys(this.attributes);
-    }
-
-    if (map.convert === 'toCamel') {
-      converter = toCamel;
-    } else if (map.convert == 'toUnderscored') {
-      converter = toUnderscored;
-    }
-  }
-  _.each(keys, function(key) {
-    rspAttrName = (map.attrs[key] && map.attrs[key].fieldName) ? map.attrs[key].fieldName : converter(key);
-    rsp[rspAttrName] = (typeof this.attributes[key].toJSON === 'function')? this.attributes[key].toJSON(options, mode) : (typeof this.attributes[key] === 'object')? converter(this.attributes[key]) : this.attributes[key];
-    if(map.attrs[key] && map.attrs[key].fn) {
-      if(map.attrs[key].fn == 'stringify') {
-        rsp[rspAttrName] = JSON.stringify(rsp[rspAttrName]);
-      } else if(map.attrs[key].fn == 'parse') {
-        rsp[rspAttrName] = JSON.parse(rsp[rspAttrName]);
-      } else if(typeof map.attrs[key].fn === 'function') {
-        rsp[rspAttrName] = map.attrs[key].fn.call(this, rsp[rspAttrName]);
-      } else {
-        throw new Error('When attempting toJSON map.attrs.<key>.fn was not a valid value');
-      }
-    }
-
-  }, this);
-
-  return rsp;
-}
-
- */
+*/
