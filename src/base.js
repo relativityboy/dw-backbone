@@ -13,7 +13,6 @@ define([
   var _exports = {},
     Model,
     Collection,
-    View,
     isA,
     toCamel,
     toUnderscored,
@@ -562,112 +561,5 @@ define([
       return this;
     }
   });
-/** No tests for the following yet. Still fleshing out ideas.
-  //ROOT VIEW
-  View = _exports.View = Backbone.View.extend({
-    '$elf':function(cssExpr) {
-      return this.$el.find(cssExpr);
-    },
-    setViewOnModel:function() {
-      if(!this.model.hasOwnProperty('views')) {
-        this.model.views = [];
-      }
-      this.model.views.push(this);
-    },
-    /**
-     * called inside setModel() only if there is a .model on the view.
-     * extending views can implement this function if there are children or special operations to be done before
-     * just after unstickit() is called
-     * @param model
-     * /
-    setModelAfterUnstickit:function(model) {
-      //this is a no-op, extending views can implement this function if there are children
-    },
-    /**
-     * called inside setModel()
-     * extending views can implement this function if there are children or special operations to be done before
-     * before stickit() is called
-     * @param model
-     * /
-    setModelBeforeStickit:function(model) {
-      //this is a no-op, 
-    },
-    setModel:function(model) {
-      this.unsetModel();
-      if(model) {
-        if(model) {
-          this.model = model;
-          this.bindModel();
-        }
-        /* this.setModelAfterUnstickit(model);
-        if(this.setViewOnModel && this.model.views) {
-          for(var i = 0; i < this.model.views.length; i++) {
-            if(this === this.model.views[i]) {
-              this.model.views.splice(i, 1);
-              break;
-            }
-          }
-        } * /
-      }
-      this.model = model;
-      if(typeof this.setViewOnModel === 'function') {
-        this.setViewOnModel();
-      }
-      this.setModelBeforeStickit(model);
-      this.stickit();
-      return this;
-    },
-    bindModel:function() {
-      throw new Error('View must implement bindModel');
-    },
-    unsetModel: function() {
-      if(this.model) {
-        this.model.off(null, null, this);
-        this.unstickit();
-        this.disposeChildViews();
-        delete this.model;
-      }
-    },
-    remove:function() {
-      if(this.model && this.model.views) {
-        for(var i = 0; i < this.model.views.length; i++) {
-          if(this === this.model.views[i]) {
-            this.model.views.splice(i, 1);
-            break;
-          }
-        }
-      }
-      Backbone.View.prototype.remove.call(this);
-    }
-  }); */
   return _exports;
 });
-/*
-///
-jsonMaps = { //this, once supporting code is written defines mappings to &&|| from an object format.
-  DB:{
-    to:{
-      convert:'', //may be one of 'toCamel', 'toUnderscored'- optional
-      include:[], //if present, ONLY these attributes will be included
-      exclude:[], //if present and include is not present, ONLY these attributes will be excluded
-      attrs:{ //- optional
-        attrName:{ //if attribute 'attrName' is present, it will be processed with the contained options
-          fieldName:'<outputFieldName>', //will be assigned to this name - optional
-          fn:'' //may be one of ['stringify', 'parse', function] - optional
-        }
-      }
-    },
-    from:{ //used on construct, if special option provided in constructor. operations happen before 'set'
-      convert:'', //may be one of 'toCamel', 'toUnderscored'
-      include:[], //if present, ONLY these attributes will be included
-      exclude:[], //if present and include is not present, ONLY these attributes will be excluded
-      inputs: { //- optional
-        inputName:{ //if  'inputName' is present, it will be processed with the contained options
-          attrName:'<outputAttrName>', //will be assigned to this name - optional
-          fn:'' //may be one of ['stringify', 'parse', function] - optional
-        }
-      }
-    }
-  }
-}
-*/
