@@ -309,17 +309,9 @@ define([
     },
 
     /**
-     * WIP: Removes views associated with this model.
-     * Deregistration of listeners will be supported, but you have to do that yourself for now.
+     * Disposes of self and first level child models.
      */
     dispose:function() {
-      var views;
-      if(this.views) {
-        views = _.clone(this.views);
-        _.each(views, function(view) {
-          view.remove();
-        });
-      }
       for(var i in this.attributes) if(this.hasOwnProperty(i)) {
         if(((this.attributes[i] instanceof Backbone.Model) == true) || ((this.attributes[i] instanceof _export.Collection) == true)) {
           try {
