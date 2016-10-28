@@ -29,13 +29,16 @@ dw-backbone was created with these problems in mind.
 * **.Model.logicallyIdentical** - takes either JSON, or a Model. _model.logicallyIdentical([json/model2])_
     * Same basic functionality as .logicallyIdentical
     * Compares only the attributes (and child attributes) of the Models.
-* **.Model._set.<attrName>** - custom setters _Model.set.\<attrName\> = function(val) {return !val;}_
-    * define a function for attribute <attrName> and calls to .set('<attrName>') will first pass the value to your
+* **.Model._set.\<attrName\>** - custom setters _Model.set.\<attrName\> 
+= function(val) {return !val;}_ or _Model.set.\<attrName\> = SomePackage.Model_
+    * define a function for attribute \<attrName\> and calls to .set('\<attrName\>') will first pass the value to your
     function for modification
+    * define a Model and assign it to _\_set.\<attrName\>_ and JSON will be hydrated to that model. 
+    Respects existing models if you pass them in.
 * **.Model._setCollections** - for child collections as attributes _Model.setCollections.\<attrName\> = CollectionConstructor_
-    * each key <attrName> on this object mirrors an attribute
+    * each key \<attrName\> on this object mirrors an attribute
     * the value of the key is the Collection definition that will be instantiated.
-    * calls to .set('<attrName>') with JSON or a Model will trigger a merge
+    * calls to .set('\<attrName\>') with JSON or a Model will trigger a merge
     * the collections are directly accessible via .get
 * **.Collection** - extend this to support your model's .constructor and .toJSON functionality
 

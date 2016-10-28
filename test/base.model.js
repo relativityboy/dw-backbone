@@ -38,8 +38,10 @@ describe('Base.Model', function() {
   });
 
   describe(".set functionality", function() {
-    var attributes, model, Model, undef;
+    var attributes, model, Model, undef, ModelAttribute;
     before(function() {
+      ModelAttribute = Base.Model.extend({});
+
       Model = Base.Model.extend({
         _setCollections:{
           collection:Backbone.Collection.extend({model:Backbone.Model.extend({idAttribute:'id'})})
@@ -62,7 +64,8 @@ describe('Base.Model', function() {
             })
 
             return val;
-          }
+          },
+          'l':ModelAttribute
         }
       });
     });
@@ -92,6 +95,18 @@ describe('Base.Model', function() {
       var date = new Date();
       model.set('b', date);
       expect(model.get('b')).to.equal(date);
+    });
+    it("uses _set.<attrName> on set for child model instantiation", function() {
+      var modelAttribute, modelAttributeJSON = {'bork':'zork'};
+      expect(model.get('l')).to.equal(undef);
+      model.set('l', modelAttributeJSON);
+      expect(model.get('l')).to.not.equal(modelAttributeJSON);
+      expect(model.get('l')).to.be.an.instanceof(ModelAttribute);
+      modelAttribute = model.get('l');
+      model.set('l', modelAttributeJSON);
+      expect(model.get('l')).to.not.equal(modelAttribute);
+      model.set('l', modelAttribute);
+      expect(model.get('l')).to.equal(modelAttribute);
     });
     it("uses _set.<attrName> in conjunction with _setCollection", function() {
       expect(model.get('collection')).to.equal(undef);

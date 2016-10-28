@@ -336,7 +336,7 @@ define([
     _setSpecial:function(attrs, options) {
       return attrs;
     },
-    
+
     set: function (key, val, options) { //this function is MIT licensed from a 3rd party.
       // This first bit is what `set` does internally to deal with
       // the two possible argument formats.
@@ -378,7 +378,15 @@ define([
       }
 
       for(attr in this._set) if(this._set.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
-        attrs[attr] = this._set[attr].call(this, attrs[attr], options);
+        if(this._set[attr].prototype instanceof Backbone.Model) { //if the attribute wants to be a model, hydrate it if needed!
+          if((attrs[attr] instanceof this._set[attr]) === false) {
+            attrs[attr] = new this._set[attr](attrs[attr])
+          } else {
+            //pass
+          }
+        } else {
+          attrs[attr] = this._set[attr].call(this, attrs[attr], options);
+        }
       }
 
       // Clean up the incoming key/value pairs.
@@ -460,7 +468,7 @@ define([
 
       return rsp;
     },
-    
+
     fromJSON:function(data, mode) {
       var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = function(val) { return val};;
       if(!mode && this.jsonMaps.hasOwnProperty('_') && this.jsonMaps._.hasOwnProperty('from')) {
