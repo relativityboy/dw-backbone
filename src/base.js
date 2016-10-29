@@ -1,8 +1,8 @@
 //todo: need to create the constructor function, and then create the new 'set' functionality.
 
 if (typeof define !== 'function') {
- var define = require('amdefine')(module);
- }
+  var define = require('amdefine')(module);
+}
 define([
   'underscore',
   'backbone'
@@ -20,7 +20,7 @@ define([
     cleanObject,
     logicallyIdentical;
 
- // _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
+  // _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
   //SUPPORT FUNCTIONS & VARIABLES
 
@@ -279,6 +279,7 @@ define([
   //ROOT MODEL
   _exports.Model = Model = Backbone.Model.extend({
     constructor: function(attributes, options) {
+      this._destroyListeners = {}; //allows us to track DWB managed child-models for on-destroy unbinding & unset
       switch(_exports.isA(options)) {
         case 'string' :
           options = {mode:options};
@@ -326,6 +327,24 @@ define([
     },
     _set:{},
     _setCollections:{},
+
+    /**
+     * Internal function. Creates an attribute assignment specific on-destroy listener.
+     * @param model
+     * @param atrName
+     * @returns {Function}
+     */
+    makeDestroyListener:function(model, atrName) {
+      var self = this;
+      return function() {
+        model.off(null, null, self);
+        if(self.attributes[atrName] === model) {
+          delete self._destroyListeners[atrName];
+          self.unset(atrName);
+        }
+      };
+    },
+
     /**
      * this can be over-ridden by extending classes
      * @param attrs
@@ -337,10 +356,10 @@ define([
       return attrs;
     },
 
-    set: function (key, val, options) { //this function is MIT licensed from a 3rd party.
-      // This first bit is what `set` does internally to deal with
-      // the two possible argument formats.
-      var attrs, attr;
+    set: function (key, val, options) {
+      var atrName, attrs, newAttr, oldAttr;
+
+      //cleanup arguments
       if (typeof key === 'object') {
         attrs = key;
         options = val;
@@ -361,38 +380,56 @@ define([
         delete attrs.parentModel;
       }
 
-      for(attr in this._setCollections) if(this._setCollections.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
-        if(!this.attributes[attr] || this.attributes[attr].constructor !== this._setCollections[attr]) {
-          this.attributes[attr] = new this._setCollections[attr]();
-        }
-        if(attrs[attr].constructor === this._setCollections[attr]) {
-          console.log('warning: attempting to set backbone collection as attribute:' + attr + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
-          attrs[attr] = attrs[attr].models;
-        }
-        if(this._set.hasOwnProperty(attr)) {
-          attrs[attr] = this._set[attr].call(this, attrs[attr], options);
-        }
-        this.attributes[attr].set(attrs[attr])//, {merge:true});
-        delete attrs[attr];
-        this.trigger('change:' + attr)
-      }
+      //handle managed Collections, Models, and attribute specific operations
+      for(atrName in attrs) if(attrs.hasOwnProperty(atrName)) {
+        newAttr = attrs[atrName];
+        oldAttr = this.attributes[atrName];
 
-      for(attr in this._set) if(this._set.hasOwnProperty(attr) && attrs.hasOwnProperty(attr)) {
-        if(this._set[attr].prototype instanceof Backbone.Model) { //if the attribute wants to be a model, hydrate it if needed!
-          if((attrs[attr] instanceof this._set[attr]) === false) {
-            attrs[attr] = new this._set[attr](attrs[attr])
-          } else {
-            //pass
+        //Handling Collections
+        if(this._setCollections.hasOwnProperty(atrName)) {
+          if(!oldAttr || (oldAttr.constructor !== this._setCollections[atrName])) {
+            this.attributes[atrName] = new this._setCollections[atrName]();
           }
-        } else {
-          attrs[attr] = this._set[attr].call(this, attrs[attr], options);
+          if(newAttr.constructor === this._setCollections[atrName]) {
+            console.log('warning: attempting to set backbone collection as attribute:' + atrName + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
+            newAttr = _.clone(attrs[atrName].models); //we don't want the original collection's array, just its contents.
+          }
+          if(this._set.hasOwnProperty(atrName)) {
+            newAttr = this._set[atrName].call(this, newAttr, options);
+          }
+          this.attributes[atrName].set(newAttr);
+          delete attrs[atrName];
+          this.trigger('change:' + atrName);
+        }
+        //Handling classic '_set'
+        else if(this._set.hasOwnProperty(atrName) ) {
+          if(this._set[atrName].prototype instanceof Backbone.Model) { //if the attribute wants to be a model, hydrate it if needed!
+            if(newAttr && newAttr instanceof this._set[atrName] === false) {
+              newAttr = new this._set[atrName](newAttr);
+            }
+          } else {
+            newAttr = this._set[atrName].call(this, newAttr, options);;
+          }
+
+
+          //we're checking for & creating unique destroy listeners because the child-model may be assgined to this model
+          // @ more than one attribute.
+          if(oldAttr && (oldAttr instanceof Backbone.Model) && this._destroyListeners[atrName]) {
+            oldAttr.off(null, this._destroyListeners[atrName]);
+            delete this._destroyListeners[atrName];
+          }
+          if(newAttr && (newAttr instanceof Backbone.Model)) {
+            this._destroyListeners[atrName] = this.makeDestroyListener(newAttr, atrName);
+            newAttr.on('destroy', this._destroyListeners[atrName], this);
+          }
+          attrs[atrName] = newAttr;
         }
       }
 
-      // Clean up the incoming key/value pairs.
+      //handle legacy and attribute combination behaviors by extending classes
       attrs = this._setSpecial(attrs, options);
 
-      // And then punt to the standard Model#set
+      // And then punt to the standard Model#set for default Backbone behaviors
       return Backbone.Model.prototype.set.call(this, attrs, options);
     },
     /**

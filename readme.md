@@ -5,14 +5,16 @@ create custom serializers and de-serializers. +tested +auto-instantiation of chi
 
 
 ###The pitch
-Re-usable patterns and practices are necessary for any long-lived codebase. 
+Resilient patterns and practices are necessary for any long-lived codebase. 
 Funky customization is necessary to meet the demands of many an API / UI.
+Embrace the funk, but don't let it dominate your work. Be kind to yourself 
+and your successors.
 
 dw-backbone was created with these problems in mind.
 
 ###What it can do
 * **db-backbone.Model** - 
-* **.Model.contstructor** - _model = new Model(json, [mode])_ instantiate a clean model from almost any garbage you throw at it.
+* **.Model.constructor** - _model = new Model(json, [mode])_ instantiate a clean model from almost any garbage you throw at it.
     * transformation - and it all happens before a single event is fired.
         * pass underscored data into your model and (optionally) convert it into camelCased attributes
         * pass camelCased data into your model and (optionally) convert it into underscored attributes
@@ -34,7 +36,9 @@ dw-backbone was created with these problems in mind.
     * define a function for attribute \<attrName\> and calls to .set('\<attrName\>') will first pass the value to your
     function for modification
     * define a Model and assign it to _\_set.\<attrName\>_ and JSON will be hydrated to that model. 
-    Respects existing models if you pass them in.
+        * Respects existing models if you pass them in.
+        * Listens for 'destroy' events and removes all listeners 
+        and removes the model from .attributes. (un-binds on unset)
 * **.Model._setCollections** - for child collections as attributes _Model.setCollections.\<attrName\> = CollectionConstructor_
     * each key \<attrName\> on this object mirrors an attribute
     * the value of the key is the Collection definition that will be instantiated.
