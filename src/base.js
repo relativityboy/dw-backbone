@@ -487,20 +487,21 @@ define([
         keys = _.keys(this.attributes);
       }
       _.each(keys, function(key) {
-        rspAttrName = (map.attrs[key] && map.attrs[key].fieldName) ? map.attrs[key].fieldName : converter(key);
-        rsp[rspAttrName] = (typeof this.attributes[key].toJSON === 'function')? this.attributes[key].toJSON(options, mode) : (typeof this.attributes[key] === 'object')? converter(this.attributes[key]) : this.attributes[key];
-        if(map.attrs[key] && map.attrs[key].fn) {
-          if(map.attrs[key].fn == 'stringify') {
-            rsp[rspAttrName] = JSON.stringify(rsp[rspAttrName]);
-          } else if(map.attrs[key].fn == 'parse') {
-            rsp[rspAttrName] = JSON.parse(rsp[rspAttrName]);
-          } else if(typeof map.attrs[key].fn === 'function') {
-            rsp[rspAttrName] = map.attrs[key].fn.call(this, rsp[rspAttrName]);
-          } else {
-            throw new Error('When attempting toJSON map.attrs.<key>.fn was not a valid value');
+        if(typeof this.attributes[key] !== 'undefined') {
+          rspAttrName = (map.attrs[key] && map.attrs[key].fieldName) ? map.attrs[key].fieldName : converter(key);
+          rsp[rspAttrName] = (typeof this.attributes[key].toJSON === 'function') ? this.attributes[key].toJSON(options, mode) : (typeof this.attributes[key] === 'object') ? converter(this.attributes[key]) : this.attributes[key];
+          if (map.attrs[key] && map.attrs[key].fn) {
+            if (map.attrs[key].fn == 'stringify') {
+              rsp[rspAttrName] = JSON.stringify(rsp[rspAttrName]);
+            } else if (map.attrs[key].fn == 'parse') {
+              rsp[rspAttrName] = JSON.parse(rsp[rspAttrName]);
+            } else if (typeof map.attrs[key].fn === 'function') {
+              rsp[rspAttrName] = map.attrs[key].fn.call(this, rsp[rspAttrName]);
+            } else {
+              throw new Error('When attempting toJSON map.attrs.<key>.fn was not a valid value');
+            }
           }
         }
-
       }, this);
 
       return rsp;
