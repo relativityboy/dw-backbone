@@ -324,6 +324,7 @@ define([
       }
       this.removeParent();
       this.trigger('dispose', this);
+      this.trigger('destroy', this);
     },
     _set:{},
     _setCollections:{},

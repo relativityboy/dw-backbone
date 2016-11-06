@@ -96,7 +96,7 @@ describe('Base.Model', function() {
       model.set('b', date);
       expect(model.get('b')).to.equal(date);
     });
-    it("uses _set.<attrName> on set for child model instantiation", function() {
+    it("uses _set.<attrName> when instanceof Backbone.Model on set for child model instantiation", function() {
       var modelAttribute, modelAttributeJSON = {'bork':'zork'};
       expect(model.get('l')).to.equal(undef);
       model.set('l', modelAttributeJSON);
@@ -107,6 +107,33 @@ describe('Base.Model', function() {
       expect(model.get('l')).to.not.equal(modelAttribute);
       model.set('l', modelAttribute);
       expect(model.get('l')).to.equal(modelAttribute);
+    });
+
+    it("removes attribute when it's destroyed IF attribute is instanceof Backbone.Model & was instantiated by _set.<attrName>", function() {
+      var modelAttribute, modelAttributeJSON = {'bork':'zork'};
+      //removed on dispose()
+      model.set('l', modelAttributeJSON);
+      modelAttribute = model.get('l');
+      modelAttribute.dispose(); //trigger the delete event
+      expect(model.get('l')).to.equal(undef);
+
+      //removed on destroy()
+      model.set('l', modelAttributeJSON);
+      modelAttribute = model.get('l');
+      modelAttribute.destroy(); //trigger the delete event
+      expect(model.get('l')).to.equal(undef);
+
+      //removed even if child model is created outside of ._set, so long as attribute type is declared in ._set
+      model.set('l', new ModelAttribute(modelAttributeJSON));
+      modelAttribute = model.get('l');
+      modelAttribute.destroy(); //trigger the delete event
+      expect(model.get('l')).to.equal(undef);
+
+      //not removed if attribute's type is not declared in ._set
+      model.set('qq', new ModelAttribute(modelAttributeJSON));
+      modelAttribute = model.get('qq');
+      modelAttribute.destroy(); //trigger the delete event
+      expect(model.get('qq')).to.equal(modelAttribute);
     });
     it("uses _set.<attrName> in conjunction with _setCollection", function() {
       expect(model.get('collection')).to.equal(undef);
