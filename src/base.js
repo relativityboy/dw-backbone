@@ -28,25 +28,47 @@ define([
    * Like 'typeof' operator but outputs 'array', 'date', 'NaN', 'null' for conforming items.
    * @type {isA}
    */
-  _exports.isA = isA = function(obj) {
+  _exports.isA = isA = function(obj, is) {
     var type = typeof obj;
-    switch(type) {
-      case 'object' :
-        if(obj === null) {
-          return 'null';
-        }
-        if(obj.constructor === Array) {
-          return 'array';
-        }
-        if(obj.constructor === Date) {
-          return 'date';
-        }
+    if(is) {
+      switch (type) {
+        case 'object' :
+          if (obj === null) {
+            return 'null' === is;
+          }
+          if (obj.constructor === Array) {
+            return 'array' === is;
+          }
+          if (obj.constructor === Date) {
+            return 'date'=== is;
+          }
 
-        break;
-      case 'number' :
-        if(isNaN(obj)) {
-          return 'NaN';
-        }
+          break;
+        case 'number' :
+          if (isNaN(obj)) {
+            return 'NaN' === is;
+          }
+      }
+      return type === is;
+    } else {
+      switch (type) {
+        case 'object' :
+          if (obj === null) {
+            return 'null';
+          }
+          if (obj.constructor === Array) {
+            return 'array';
+          }
+          if (obj.constructor === Date) {
+            return 'date';
+          }
+
+          break;
+        case 'number' :
+          if (isNaN(obj)) {
+            return 'NaN';
+          }
+      }
     }
     return type;
   };
@@ -72,8 +94,6 @@ define([
           }
         });
         return resp;
-      case 'string' :
-        return val;
     }
     return _.clone(val); //we clone, because every other behavior results in clone
   }
@@ -124,9 +144,8 @@ define([
 
   /**
    * Recursively converts the passed in camelCased item into a under_scored one.
-   * *note: removes all '_' (incl multiple underscores)
    * *note: do not use on recursive objects!
-   * @type {toCamel}
+   * @type {toUnderscored}
    */
   _exports.toUnderscored = toUnderscored = function(val) {
     var resp;
@@ -155,12 +174,18 @@ define([
     return _.clone(val); //we clone, because every other behavior results in clone
   }
 
+  /**
+   * Underscores and then 'pretty stringifies' whatever is passed in.
+   * @param obj
+   * @returns ""
+   */
   _exports.toUnderscoredJSONString = function(obj) {
     return toJSONString(toUnderscored(obj));
   };
 
   /**
-   * clones 'mask' and removes attributes named in 'cleanList'
+   * This function is being considered for deprecation
+   * _.clones 'mask' and removes attributes named in 'cleanList'
    * @type {_exports.newMask}
    */
   var cleanMask = _exports.newMask = function(mask, cleanList) {
@@ -175,6 +200,7 @@ define([
   };
 
   /**
+   * This function is being considered for deprecation
    * takes and object 'obj' and returns a cleaned object where only attributes in the mask 'mask' remain
    * @param obj
    * @param mask - an object tree of allowed attributes.
@@ -323,7 +349,7 @@ define([
         }
       }
       this.removeParent();
-      this.trigger('dispose', this);
+      this.trigger('disposed', this);
       this.trigger('destroy', this);
     },
     _set:{},

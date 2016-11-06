@@ -1,4 +1,8 @@
 ##Log:
+###2016.11.06
+* Added code coverage reports. Testing above 80% in all areas. 
+* Minor update to isA, boolean responses if a second argument matches type 
+(code using isA can be slightly more terse)
 ###2016.10.29
 * Added support for automatic removal of child-models and listeners on them from parent-models
 on 'destroy' event.
