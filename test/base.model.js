@@ -149,6 +149,50 @@ describe('Base.Model', function() {
 
     });
   });
+  describe(".logicallyIdentical", function() {
+    var model1, model2, model3;
+    beforeEach(function () {
+      var fnObj1 = function() {
+        return {
+          id:1,
+          'appleSauce': {
+            'isTasty': true,
+            'bitterBite': false
+          },
+          'grapefruitJuice': {
+            'robertFarthing': ['mimi_roark']
+          }
+        };
+      };
+
+      var fnObj2 = function() {
+        return {
+          id:3,
+          'appleSauce': {
+            'isTasty': true,
+            'bitterBite': false
+          },
+          'grapefruitJuice': {
+            'robertFarthing': ['mimi_roark', 'joan']
+          }
+        };
+      };
+      model1 = new Base.Model(fnObj1());
+      model2 = new Base.Model(fnObj1());
+      model3 = new Base.Model(fnObj2());
+    });
+    it("exists", function() {
+      expect(typeof model1.logicallyIdentical).to.equal('function');
+    });
+    it("compares models for perfect attribute equality", function() {
+      expect(model1.logicallyIdentical(model2)).to.equal(true);
+    });
+
+    it("compares models for attribute equality except id", function() {
+      model2.set('id', 11);
+      expect(model1.logicallyIdentical(model2, true)).to.equal(true);
+    });
+  });
   describe(".toJSON", function() {
     var attributes, model, Model, undef;
     before(function() {
