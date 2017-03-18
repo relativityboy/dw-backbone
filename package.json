@@ -8,9 +8,9 @@
   },
   "author": "Donovan Walker",
   "license": "MIT",
-  "repository":{
-    "type":"git",
-    "url":"https://github.com/relativityboy/dw-backbone.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/relativityboy/dw-backbone.git"
   },
   "dependencies": {
     "amdefine": "^1.0.0",
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "istanbul": "^0.4.5"
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0"
   }
 }
