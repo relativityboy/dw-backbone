@@ -348,6 +348,26 @@ describe('Base', function() {
           robertFarthing:2
         };
         expect(Base.logicallyIdentical(obj1,obj2)).to.equal(false);
+        obj1.grapefruitJuice = {
+          robertFarthing:2
+        };
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(true);
+        obj1.grapefruitJuice = {};
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(false);
+
+      });
+      it("compares dates for logical equality", function() {
+        obj1.adate = new Date();
+        obj2.adate = new Date(obj1.adate.getTime());
+        //obj2.adate.setTime();
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(true);
+        obj1.adate.setTime(0);
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(false);
+      });
+      it("Treats NaN as equivalent", function() {
+        obj1.nan = Math.sqrt(-1);
+        obj2.nan = Math.sqrt(-1);
+        expect(Base.logicallyIdentical(obj1,obj2)).to.equal(true);
       });
       it("compares arrays of simple items for equality", function() {
         expect(Base.logicallyIdentical([1,2,3],[1,2,3])).to.equal(true);

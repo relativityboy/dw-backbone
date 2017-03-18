@@ -285,7 +285,7 @@ define([
         }
         break;
       case 'date' :
-        if(item1[key].getTime() !== item2[key].getTime())
+        if(item1.getTime() !== item2.getTime())
           return false;
         break;
       case 'NaN' :
