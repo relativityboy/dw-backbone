@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/base.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "test": "nyc ./node_modules/.bin/mocha --reporter spec",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "Donovan Walker",
   "license": "MIT",
@@ -21,7 +22,9 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "coveralls": "^2.12.0",
     "istanbul": "^0.4.5",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "nyc": "^10.1.2"
   }
 }

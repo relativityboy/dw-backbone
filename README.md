@@ -1,4 +1,4 @@
-## dw-backbone [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url]
+## dw-backbone [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coverage Status](https://coveralls.io/repos/github/relativityboy/dw-backbone/badge.svg?branch=master)](https://coveralls.io/github/relativityboy/dw-backbone?branch=master)
 
 
 Add security and clarity to your Backbone Models & Collections with easy to
