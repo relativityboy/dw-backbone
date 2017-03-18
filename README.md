@@ -56,6 +56,7 @@ dw-backbone was created with these problems in mind.
 
 [npm-image]: http://img.shields.io/npm/v/dw-backbone.svg
 [npm-url]: https://www.npmjs.com/package/dw-backbone
+
 [downloads-image]: http://img.shields.io/npm/dm/dw-backbone.svg
 
 [travis-image]: https://api.travis-ci.org/relativityboy/dw-backbone.png
