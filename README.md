@@ -1,10 +1,11 @@
-#dw-backbone
+## dw-backbone [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url]
+
 
 Add security and clarity to your Backbone Models & Collections with easy to
 create custom serializers and de-serializers. +tested +auto-instantiation of child models & collections.
 
 
-###The pitch
+### The pitch
 Resilient patterns and practices are necessary for any long-lived codebase. 
 Funky customization is necessary to meet the demands of many an API / UI.
 Embrace the funk, but don't let it dominate your work. Be kind to yourself 
@@ -12,7 +13,7 @@ and your successors.
 
 dw-backbone was created with these problems in mind.
 
-###What it can do
+### What it can do
 * **db-backbone.Model** - 
 * **.Model.constructor** - _model = new Model(json, [mode])_ instantiate a clean model from almost any garbage you throw at it.
     * transformation - and it all happens before a single event is fired.
@@ -52,4 +53,11 @@ dw-backbone was created with these problems in mind.
     * .toUnderscored - converts a camelCased string to an underscored one. Pass in an object to convert all it's keys.
     * .toCamel - converts an underscored string to a camelCased one. Pass in an object to convert all it's keys.
 
-##
+
+[npm-image]: http://img.shields.io/npm/v/dw-backbone.svg
+[npm-url]: https://www.npmjs.com/package/dw-backbone
+[downloads-image]: http://img.shields.io/npm/dm/dw-backbone.svg
+
+[travis-image]: https://api.travis-ci.org/relativityboy/dw-backbone.png
+[travis-url]: https://travis-ci.org/relativityboy/dw-backbone
+
