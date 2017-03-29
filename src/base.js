@@ -302,8 +302,21 @@ define([
     return true;
   };
 
+  /**
+   * this can be over-ridden by extending classes
+   * Deprecated. Called in Model.set
+   * @param attrs
+   * @param options
+   * @returns {*}
+   * @private
+   */
+  _setSpecial = function(attrs, options) {
+    return attrs;
+  }
+
   //ROOT MODEL
   _exports.Model = Model = Backbone.Model.extend({
+    dotPathIsChildTree:true,
     constructor: function(attributes, options) {
       this._destroyListeners = {}; //allows us to track DWB managed child-models for on-destroy unbinding & unset
       switch(_exports.isA(options)) {
@@ -379,14 +392,12 @@ define([
      * @returns {*}
      * @private
      */
-    _setSpecial:function(attrs, options) {
-      return attrs;
-    },
+    _setSpecial:_setSpecial,
 
     set: function (key, val, options) {
-      var atrName, attrs, newAttr, oldAttr;
+      var atrName, attrs, newAttr, oldAttr, dotAttrs = false, dotAtrName, dotAtrNameSuffix;
 
-      //cleanup arguments
+      //1. collect arguments into a single format
       if (typeof key === 'object') {
         attrs = key;
         options = val;
@@ -394,6 +405,7 @@ define([
         (attrs = {})[key] = val;
       }
 
+      //2. set the parent model if there's a new one
       if(attrs && attrs.parentModel) {
         if(this.parentModel && this.parentModel !== attrs.parentModel) {
           this.removeParent();
@@ -407,12 +419,29 @@ define([
         delete attrs.parentModel;
       }
 
-      //handle managed Collections, Models, and attribute specific operations
+      //3. prep for dotNotation set call. Comes first because dot-noted attributes need to be set 'last'
+      if(this.dotPathIsChildTree) {
+        dotAttrs = {};
+        for(dotAtrName in attrs) if(attrs.hasOwnProperty(dotAtrName)) {
+          dotAtrNameSuffix = dotAtrName.split('.');
+          if(1 < dotAtrNameSuffix.length) {
+            atrName = dotAtrNameSuffix.shift();
+            if(!dotAttrs.hasOwnProperty(atrName)) {
+              dotAttrs[atrName] = {};
+            }
+            dotAttrs[atrName][dotAtrNameSuffix.join('.')] = attrs[dotAtrName];
+            delete attrs[dotAtrName];
+          }
+        }
+      }
+      //4. Process non-dot noted attributes with custom setters & getters
+      //These are Managed Collections, Models, and attribute specific operations
       for(atrName in attrs) if(attrs.hasOwnProperty(atrName)) {
+
         newAttr = attrs[atrName];
         oldAttr = this.attributes[atrName];
 
-        //Handling Collections
+        //4.a. Handling Collections
         if(this._setCollections.hasOwnProperty(atrName)) {
           if(!oldAttr || (oldAttr.constructor !== this._setCollections[atrName])) {
             this.attributes[atrName] = new this._setCollections[atrName]();
@@ -428,7 +457,7 @@ define([
           delete attrs[atrName];
           this.trigger('change:' + atrName);
         }
-        //Handling classic '_set'
+        //4.b. Handling classic '_set'
         else if(this._set.hasOwnProperty(atrName) ) {
           if(this._set[atrName].prototype instanceof Backbone.Model) { //if the attribute wants to be a model, hydrate it if needed!
             if(newAttr && newAttr instanceof this._set[atrName] === false) {
@@ -437,7 +466,6 @@ define([
           } else {
             newAttr = this._set[atrName].call(this, newAttr, options);;
           }
-
 
           //we're checking for & creating unique destroy listeners because the child-model may be assgined to this model
           // @ more than one attribute.
@@ -453,11 +481,29 @@ define([
         }
       }
 
-      //handle legacy and attribute combination behaviors by extending classes
-      attrs = this._setSpecial(attrs, options);
+      //5. handle legacy and attribute combination behaviors by extending classes - deprecated behavior!
+      if(this._setSpecial !== _setSpecial) {
+        console.log("Warning - ._setSpecial is deprecated as of 0.1.8 and will likely be removed in 1.0.0");
+        attrs = this._setSpecial(attrs, options);
+      }
 
-      // And then punt to the standard Model#set for default Backbone behaviors
-      return Backbone.Model.prototype.set.call(this, attrs, options);
+      //6. Punt to the standard Model#set for default Backbone behaviors - we have not set dot.path attributes yet.
+      Backbone.Model.prototype.set.call(this, attrs, options);
+
+      //7. Set dot.path attributes last (because classic behaviors should come first!)
+      if(this.dotPathIsChildTree) {
+
+        for(atrName in dotAttrs) if(dotAttrs.hasOwnProperty(atrName)) {
+
+          if(!(this.attributes[atrName] instanceof Backbone.Model)) {
+            throw new Error('Error attempting to use dot notation to set property on non Backbone.Model (could be model has not been instantiated');
+          }
+          this.attributes[atrName].set(dotAttrs[atrName]);
+        }
+      }
+
+      //8. Return self, as per classic Backbone behavior
+      return this;
     },
     /**
      * If this model has a parent, parentModel removes any parent/child relationship that exists
