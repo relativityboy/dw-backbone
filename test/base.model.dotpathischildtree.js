@@ -97,6 +97,5 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
     it("stub - can get a property from a model in a child collection where id is a number", function(){})
     it("stub - can get a property from a model in a child collection by order-index", function(){})
     it("stub - can get a property from all models in a child collection using [*]", function(){})
-  })
-
+  });
 });
