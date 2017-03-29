@@ -399,7 +399,7 @@ define([
 
       //1. collect arguments into a single format
       if (typeof key === 'object') {
-        attrs = key;
+        attrs = _.clone(key);
         options = val;
       } else {
         (attrs = {})[key] = val;

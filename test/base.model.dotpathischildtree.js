@@ -75,6 +75,24 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
       expect(aModel.get('b').get('c')).to.equal(cValue);
       expect(aModel).to.not.equal(model.get('a'));
     });
+    it("object passed to .set is not modified (side effects of that sort are bad!)",function(){
+      var attrs = {
+          'a.b.c':newValue,
+          'm':'pqr'
+        },
+        attrs2 = _.clone(attrs);
+      //make sure they're not the same object
+      expect(attrs).to.not.equal(attrs2);
+      //make sure they're logically equivalent.
+      expect(JSON.stringify(attrs)).to.equal(JSON.stringify(attrs2));
+      model.set(attrs);
+      //make sure the values got set (not needed but nice to be sure)
+      expect(model.get('a').get('b').get('c')).to.equal(newValue);
+      expect(model.get('m')).to.equal('pqr');
+
+      //and the money test. Are these two still logically equivalent?
+      expect(JSON.stringify(attrs)).to.equal(JSON.stringify(attrs2));
+    });
     it("throws an error if attempting to set the child of a raw object",function(){
       assert.throws(function() { model.set('x.y.z',newValue); }, Error);
     });
