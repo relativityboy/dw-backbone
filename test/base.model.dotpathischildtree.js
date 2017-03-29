@@ -16,7 +16,7 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
       });
       CollectionA = Base.Collection.extend({
         model:ModelA
-      })
+      });
       Model = Base.Model.extend({
         _set:{
           a:ModelA
@@ -96,24 +96,11 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
     it("throws an error if attempting to set the child of a raw object",function(){
       assert.throws(function() { model.set('x.y.z',newValue); }, Error);
     });
-    it("throws an error if attempting to set anything within a collection\n   this test is to prove out that future collection functionality is not in place yet",function(){
-      assert.throws(function() { model.set('aList.1.b.c',newValue); }, Error);
 
-    });
   });
-  describe(".set on Child Collections - speculative future functionality", function() {
-    it("stub - can set a property on a model in a child collection where id is a string", function(){})
-    it("stub - can set a property on a model in a child collection where id is a number", function(){})
-    it("stub - can set a property on a model in a child collection by order-index", function(){})
-    it("stub - can set a property on all models in a child collection using [*]", function(){})
-  });
+
   describe(".get on child Models - speculative future functionality", function() {
     it("stub - throws an error if attempting to get the child of a raw object",function(){})
   });
-  describe(".get on child Collections - speculative future functionality", function() {
-    it("stub - can get a property from a model in a child collection where id is a string", function(){})
-    it("stub - can get a property from a model in a child collection where id is a number", function(){})
-    it("stub - can get a property from a model in a child collection by order-index", function(){})
-    it("stub - can get a property from all models in a child collection using [*]", function(){})
-  });
+
 });

@@ -492,13 +492,32 @@ define([
 
       //7. Set dot.path attributes last (because classic behaviors should come first!)
       if(this.dotPathIsChildTree) {
-
         for(atrName in dotAttrs) if(dotAttrs.hasOwnProperty(atrName)) {
-
-          if(!(this.attributes[atrName] instanceof Backbone.Model)) {
-            throw new Error('Error attempting to use dot notation to set property on non Backbone.Model (could be model has not been instantiated');
+          if(this.attributes[atrName] instanceof Backbone.Model) {
+            this.attributes[atrName].set(dotAttrs[atrName]);
+          } else if(this.attributes[atrName] instanceof Backbone.Collection) {
+            _.each(dotAttrs[atrName], function(val, dotAtrName) {
+              var dotAtrNameSuffix = dotAtrName.split('.'),
+                getterExpr = dotAtrNameSuffix.shift(),
+                attrs = {};
+              attrs[dotAtrNameSuffix.join('.')] = val;
+              if(dotAtrNameSuffix.length < 1) {
+                throw new Error('Attempting to use dotPath notation to set a property directly on a Collection. (' + dotAtrName + '). This is not supported. (Did you forget the .<id>. or .[index].)?');
+              }
+              if(0 === getterExpr.indexOf('[')) {
+                getterExpr = getterExpr.replace('[','').replace(']','');
+                if('*' === getterExpr) {
+                  this.setOnAll(attrs);
+                } else {
+                  this.at(parseInt(getterExpr)).set(attrs);
+                }
+              } else {
+                this.get(getterExpr).set(attrs);
+              }
+            }, this.attributes[atrName]);
+          } else {
+            throw new Error('Error attempting to use dot notation to set property on non Backbone.Model/Backbone.Collection (could be property has not been instantiated');
           }
-          this.attributes[atrName].set(dotAttrs[atrName]);
         }
       }
 
