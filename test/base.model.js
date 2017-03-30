@@ -38,13 +38,13 @@ describe('Base.Model', function() {
   });
 
   describe(".set functionality", function() {
-    var attributes, model, Model, undef, ModelAttribute;
+    var attributes, model, Model, Model2, undef, ModelAttribute, Collection;
     before(function() {
       ModelAttribute = Base.Model.extend({});
-
+      Collection = Backbone.Collection.extend({model:Backbone.Model.extend({idAttribute:'id'})})
       Model = Base.Model.extend({
         _setCollections:{
-          collection:Backbone.Collection.extend({model:Backbone.Model.extend({idAttribute:'id'})})
+          collection:Collection
         },
         _set:{
           'a':function(val) {
@@ -66,6 +66,11 @@ describe('Base.Model', function() {
             return val;
           },
           'l':ModelAttribute
+        }
+      });
+      Model2 = Base.Model.extend({
+        _setCollections: {
+          collection: Collection
         }
       });
     });
@@ -146,7 +151,24 @@ describe('Base.Model', function() {
 
       model.set('collection', ["grom", {id:2, 'boo':3}]);
       expect(model.get('collection').length).to.equal(2);
+    });
 
+    it("manages self created collection as defined by _setCollection", function() {
+      var model = new Model2({collection:[{id:2, 'boo':3}]}),
+        collection = new Collection([{id:7, 'boo':8}]);
+
+      expect(model.get('collection').length).to.equal(1);
+
+      //test
+      model.set('collection', collection);
+
+      //original collection should be preserved, not replaced
+      expect(model.get('collection')).to.not.equal(collection);
+
+      //because ids are different, classic backbone 'set' behavior observed (remove models not present in passed list)
+      expect(model.get('collection').length).to.equal(1);
+      //actual models from passed-in collection are put into collection attached to model (this helps keep any event listeners from getting destroyed)
+      expect(model.get('collection').at(0)).to.equal(collection.at(0));
     });
   });
   describe(".logicallyIdentical", function() {

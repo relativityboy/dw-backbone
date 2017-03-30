@@ -446,6 +446,7 @@ define([
           if(!oldAttr || (oldAttr.constructor !== this._setCollections[atrName])) {
             this.attributes[atrName] = new this._setCollections[atrName]();
           }
+
           if(newAttr.constructor === this._setCollections[atrName]) {
             console.log('warning: attempting to set backbone collection as attribute:' + atrName + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
             newAttr = _.clone(attrs[atrName].models); //we don't want the original collection's array, just its contents.
@@ -516,6 +517,7 @@ define([
               }
             }, this.attributes[atrName]);
           } else {
+            
             throw new Error('Error attempting to use dot notation to set property on non Backbone.Model/Backbone.Collection (could be property has not been instantiated');
           }
         }

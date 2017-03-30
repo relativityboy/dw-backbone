@@ -203,6 +203,10 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
         expect(mdl.get('b').get('c')).to.equal(updateValue1);
       });
     });
+    it("throws an error when attempting to set property directly on a collection", function(){
+      assert.throws(function() { model.set('aList.m', 'x');}, Error);
+
+    });
   });
 
   describe(".get on child Collections - speculative future functionality", function() {
