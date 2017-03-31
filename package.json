@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/base.js",
   "scripts": {
-    "test": "nyc --reporter=lcov ./node_modules/.bin/mocha --reporter spec",
+    "test": "nyc ./node_modules/.bin/mocha --reporter spec",
     "ist":"istanbul cover --report html node_modules/.bin/_mocha -- --reporter spec",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },

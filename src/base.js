@@ -384,6 +384,39 @@ define([
         }
       };
     },
+    
+    get:function (attrName) {
+      console.log('dotPath get functionality not yet tested');
+      var atr;
+      if(this.dotPathIsChildTree) {
+        var dotAtrNameSuffix = attrName.split('.');
+        if(dotAtrNameSuffix.length > 1) {
+          var dotAtrName = dotAtrNameSuffix.shift();
+          if(this.attributes.hasOwnProperty(dotAtrName)) {
+            atr = this.attributes[dotAtrName];
+            if(atr instanceof Backbone.Model) {
+              return atr.get(dotAtrNameSuffix.join('.'));
+            }
+            if(atr instanceof Backbone.Collection) {
+              var getterExpr = dotAtrNameSuffix.shift();
+              if(0 === getterExpr.indexOf('[')) {
+                atr = atr.at(parseInt(getterExpr.replace('[', '').replace(']','')));
+              } else {
+                atr = atr.get(getterExpr);
+              }
+              if(atr) {
+                if(dotAtrNameSuffix.length === 0) {
+                  return atr;
+                }
+                return atr.get(dotAtrNameSuffix.join('.'));
+              }
+            }
+            return;
+          }
+        }
+      }
+      return Backbone.Model.prototype.get.call(this, attrName);
+    },
 
     /**
      * this can be over-ridden by extending classes
@@ -517,7 +550,6 @@ define([
               }
             }, this.attributes[atrName]);
           } else {
-            
             throw new Error('Error attempting to use dot notation to set property on non Backbone.Model/Backbone.Collection (could be property has not been instantiated');
           }
         }
