@@ -386,9 +386,9 @@ define([
     },
     
     get:function (attrName) {
-      console.log('dotPath get functionality not yet tested');
       var atr;
       if(this.dotPathIsChildTree) {
+        console.log(".get with .dotPathIsChildTree has not been tested against collections!");
         var dotAtrNameSuffix = attrName.split('.');
         if(dotAtrNameSuffix.length > 1) {
           var dotAtrName = dotAtrNameSuffix.shift();
@@ -517,7 +517,7 @@ define([
 
       //5. handle legacy and attribute combination behaviors by extending classes - deprecated behavior!
       if(this._setSpecial !== _setSpecial) {
-        console.log("Warning - ._setSpecial is deprecated as of 0.1.8 and will likely be removed in 1.0.0");
+        console.log("warning: ._setSpecial is deprecated as of 0.1.8 and will likely be removed in 1.0.0");
         attrs = this._setSpecial(attrs, options);
       }
 

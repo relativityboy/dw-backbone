@@ -4,7 +4,7 @@ var assert    = require("chai").assert;
 var _         = require('underscore');
 
 describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into x.get('a').get('b').get/set('c')", function() {
-  describe(".set on child Models",function(){
+  describe(".set using dotPath (setting attributes on child models)",function(){
     var attributes, model, Model, ModelA, ModelB, CollectionA, cValue = "G", newValue = "Y", zValue = "H";
     before(function() {
 
@@ -99,8 +99,68 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
 
   });
 
-  describe(".get on child Models - speculative future functionality", function() {
-    it("stub - throws an error if attempting to get the child of a raw object",function(){})
+  describe(".get using dotPath (getting attributes on child models)", function() {
+    var attributes, model, Model, ModelA, ModelB, CollectionA, cValue = "G", zValue = "H";
+    before(function() {
+
+      ModelB = Base.Model.extend({});
+      ModelA = Base.Model.extend({
+        _set:{
+          b:ModelB
+        }
+      });
+      CollectionA = Base.Collection.extend({
+        model:ModelA
+      });
+      Model = Base.Model.extend({
+        _set:{
+          a:ModelA
+        },
+        _setCollections:{
+          aList:CollectionA
+        }
+      });
+    });
+    beforeEach(function() {
+      attributes = {
+        a:{
+          b:{
+            c:cValue
+          }
+        },
+        aList:[
+          {
+            id:'1',
+            b:{c:1}
+          },
+          {
+            id:'2',
+            b:{c:2}
+          }
+        ],
+        x:{
+          y:{
+            z:zValue
+          }
+        }
+      };
+      model = new Model(attributes);
+    });
+    it("can get a regular attribute",function(){
+      expect(model.get('a')).to.equal(model.attributes.a);
+    });
+    it("can get a child model's attribute",function(){
+      expect(model.get('a.b')).to.equal(model.attributes.a.attributes.b);
+    });
+    it("can get a 2nd degree child model's attribute",function(){
+      expect(model.get('a.b.c')).to.equal(model.attributes.a.attributes.b.attributes.c);
+    });
+    it("returns undefined if requested attribute is not set",function(){
+      assert.typeOf(model.get('a.b.d'), 'undefined');
+    });
+    it("returns undefined if parent of requested attribute is not set",function(){
+      assert.typeOf(model.get('a.c.d'), 'undefined');
+    });
   });
 
 });
