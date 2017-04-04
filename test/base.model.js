@@ -36,8 +36,50 @@ describe('Base.Model', function() {
       expect(model.attributes.collection.constructor).to.deep.equal(Backbone.Collection);
       expect(model.get('collection').get(3).constructor).to.equal(Backbone.Model)
     });
+
   });
 
+  describe(".dispose functionality", function() {
+    var childModel, model, Model = Base.Model.extend({});
+
+    beforeEach(function() {
+      model = new Model({});
+      childModel = new Model({});
+    });
+
+    it("triggers dispose & destroy events on call to .dispose()", function() {
+      var disposeTriggered = false, destroyTriggered = false;
+      model.on('disposed', function() {
+        disposeTriggered = true;
+      });
+      model.on('destroy', function() {
+        destroyTriggered = true;
+      });
+
+      model.dispose();
+
+      expect(disposeTriggered).to.be.true;
+      expect(destroyTriggered).to.be.true;
+    });
+
+    it("triggers dispose of child models call to .dispose()", function() {
+      var disposeTriggered = false, destroyTriggered = false;
+      childModel.on('disposed', function() {
+        disposeTriggered = true;
+      });
+      childModel.on('destroy', function() {
+        destroyTriggered = true;
+      });
+
+      model.set('childModel', childModel);
+
+      model.dispose();
+
+      expect(disposeTriggered).to.be.true;
+      expect(destroyTriggered).to.be.true;
+    });
+
+  });
   describe(".set functionality", function() {
     var attributes, model, Model, Model2, undef, ModelAttribute, Collection;
     before(function() {
@@ -153,6 +195,16 @@ describe('Base.Model', function() {
       model.set('collection', ["grom", {id:2, 'boo':3}]);
       expect(model.get('collection').length).to.equal(2);
     });
+    it("LEGACY: uses _setSpecial function if declared", function() {
+      model._setSpecial = function(attrs) {
+        attrs.abc = 5;
+        return attrs;
+      };
+      model.set({});
+      expect(model.get('abc')).to.equal(5);
+
+    });
+
 
     it("manages self created collection as defined by _setCollection", function() {
       var model = new Model2({collection:[{id:2, 'boo':3}]}),

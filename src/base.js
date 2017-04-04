@@ -302,18 +302,6 @@ define([
     return true;
   };
 
-  /**
-   * this can be over-ridden by extending classes
-   * Deprecated. Called in Model.set
-   * @param attrs
-   * @param options
-   * @returns {*}
-   * @private
-   */
-  _setSpecial = function(attrs, options) {
-    return attrs;
-  }
-
   //ROOT MODEL
   _exports.Model = Model = Backbone.Model.extend({
     dotPathIsChildTree:true,
@@ -352,13 +340,10 @@ define([
      * Disposes of self and first level child models.
      */
     dispose:function() {
-      for(var i in this.attributes) if(this.hasOwnProperty(i)) {
-        if(((this.attributes[i] instanceof Backbone.Model) == true) || ((this.attributes[i] instanceof _export.Collection) == true)) {
-          try {
-            this.attributes[i].dispose();
-          } catch (e) {
-            console.log('When disposing of', this, 'child model .' + i, this.attributes[i], 'did not have dispose function')
-          }
+      var i;
+      for(i in this.attributes) if(this.attributes.hasOwnProperty(i)) {
+        if( (typeof this.attributes[i].dispose === 'function') && (this.attributes[i] instanceof Backbone.Model) || (this.attributes[i] instanceof _exports.Collection) ) {
+          this.attributes[i].dispose();
         }
       }
       this.removeParent();
@@ -388,7 +373,6 @@ define([
     get:function (attrName) {
       var atr;
       if(this.dotPathIsChildTree && typeof attrName === 'string') {
-        console.log(".get with .dotPathIsChildTree has not been tested against collections!");
         var dotAtrNameSuffix = attrName.split('.');
         if(dotAtrNameSuffix.length > 1) {
           var dotAtrName = dotAtrNameSuffix.shift();
@@ -412,7 +396,7 @@ define([
      * @returns {*}
      * @private
      */
-    _setSpecial:_setSpecial,
+    //_setSpecial:_setSpecial,
 
     set: function (key, val, options) {
       var atrName, attrs, newAttr, oldAttr, dotAttrs = false, dotAtrName, dotAtrNameSuffix;
@@ -503,8 +487,7 @@ define([
       }
 
       //5. handle legacy and attribute combination behaviors by extending classes - deprecated behavior!
-      if(this._setSpecial !== _setSpecial) {
-        console.log("warning: ._setSpecial is deprecated as of 0.1.8 and will likely be removed in 1.0.0");
+      if(this._setSpecial) {
         attrs = this._setSpecial(attrs, options);
       }
 
