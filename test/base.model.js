@@ -1,6 +1,7 @@
 var Backbone  = require('backbone');
 var Base      = require('../src/base');
 var expect    = require("chai").expect;
+var assert    = require("chai").assert;
 var _         = require('underscore');
 
 
@@ -243,6 +244,10 @@ describe('Base.Model', function() {
       //the following check validates that the structure of both objects is the same.
       //if .toJSON weren't called .model would be an instance of Base.Model
       expect(json.object).to.deep.equal(json.model);
+    });
+    it("Throws error if invalid toJSON mode specified", function() {
+      assert.throws(function() { model.toJSON('xx');}, Error);
+
     });
   });
 

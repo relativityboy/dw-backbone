@@ -161,6 +161,9 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
     it("returns undefined if parent of requested attribute is not set",function(){
       assert.typeOf(model.get('a.c.d'), 'undefined');
     });
+    it("throws an error if attempting to get the child of a raw object",function(){
+      assert.throws(function() { model.get('x.y.z'); }, Error);
+    });
   });
 
 });

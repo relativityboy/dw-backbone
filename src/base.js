@@ -387,31 +387,18 @@ define([
     
     get:function (attrName) {
       var atr;
-      if(this.dotPathIsChildTree) {
+      if(this.dotPathIsChildTree && typeof attrName === 'string') {
         console.log(".get with .dotPathIsChildTree has not been tested against collections!");
         var dotAtrNameSuffix = attrName.split('.');
         if(dotAtrNameSuffix.length > 1) {
           var dotAtrName = dotAtrNameSuffix.shift();
           if(this.attributes.hasOwnProperty(dotAtrName)) {
             atr = this.attributes[dotAtrName];
-            if(atr instanceof Backbone.Model) {
+            if(atr instanceof Backbone.Model || atr instanceof Backbone.Collection) {
               return atr.get(dotAtrNameSuffix.join('.'));
             }
-            if(atr instanceof Backbone.Collection) {
-              var getterExpr = dotAtrNameSuffix.shift();
-              if(0 === getterExpr.indexOf('[')) {
-                atr = atr.at(parseInt(getterExpr.replace('[', '').replace(']','')));
-              } else {
-                atr = atr.get(getterExpr);
-              }
-              if(atr) {
-                if(dotAtrNameSuffix.length === 0) {
-                  return atr;
-                }
-                return atr.get(dotAtrNameSuffix.join('.'));
-              }
-            }
-            return;
+            throw new Error('Attempting to access a nested property that is not a Backbone.Model/Collection');
+
           }
         }
       }
@@ -455,7 +442,7 @@ define([
       //3. prep for dotNotation set call. Comes first because dot-noted attributes need to be set 'last'
       if(this.dotPathIsChildTree) {
         dotAttrs = {};
-        for(dotAtrName in attrs) if(attrs.hasOwnProperty(dotAtrName)) {
+        for(dotAtrName in attrs) if(attrs.hasOwnProperty(dotAtrName) && typeof dotAtrName === 'string') {
           dotAtrNameSuffix = dotAtrName.split('.');
           if(1 < dotAtrNameSuffix.length) {
             atrName = dotAtrNameSuffix.shift();
@@ -691,6 +678,7 @@ define([
   //ROOT COLLECTION
   Collection = _exports.Collection = Backbone.Collection.extend({
     model:Model,
+    dotPathIsChildTree:true,
     constructor:function(json, options) {
       if(typeof options === 'string') {
         arguments[1] = {mode: options};
@@ -723,6 +711,34 @@ define([
         model.unset(attr);
       });
       return this;
+    },
+    /**
+     *
+     * @param idi - ID or Index.
+     * @returns {*}
+     */
+    get:function(idi) {
+      var model;
+      if(this.dotPathIsChildTree && typeof idi === 'string') {
+        var dotAtrNameSuffix = idi.split('.');
+        if(dotAtrNameSuffix.length > 1) {
+          var getterExpr = dotAtrNameSuffix.shift();
+          if (0 === getterExpr.indexOf('[')) {
+            getterExpr = getterExpr.replace('[', '').replace(']', '');
+            if('*' === getterExpr) {
+              throw new Error('Wildcard dotPath notation not yet supported in Collections ' + idi);
+            }
+            model = this.at(parseInt(getterExpr));
+          } else {
+            model = this.get(getterExpr);
+          }
+          if (model) {
+            return model.get(dotAtrNameSuffix.join('.'));
+          }
+        }
+      }
+
+      return Backbone.Collection.prototype.get.call(this, idi);
     }
   });
   return _exports;
