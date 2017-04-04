@@ -1,4 +1,10 @@
-##Log:
+## Log:
+###2017.04
+* Some support for dotPath on collections.
+
+###2017.03
+* More tests (now above 90%)
+* Added support for dotPath to Models.
 ###2016.11.06
 * Added code coverage reports. Testing above 80% in all areas. 
 * Minor update to isA, boolean responses if a second argument matches type 
@@ -17,17 +23,6 @@ If you pass an instance of SomeModule.Model, it respects that.
 Views should listen for dispose & delete events and handle removing themselves.
 
 
-##Notes:
-1. Dealing with deletes..... we want parent models to be able to remove a deleted child automatically
-We'll do this via event listeners.
-    * On set check to see if current attribute is a backbone model
-    * if it is
-        * Cache the existing model
-        * See what the new assigned model is after all special setters are run.
-        * If it's exactly the same object/instance 
-            * leave it alone.
-        * else it's different - do this:
-            * remove all 'this' contexted listeners from the cached model
-            * set a destroy listner on the new one.
-1. Event Bubbling?
-    * We could take advantage of the event listener set for the delete event. It could listen for 'all'
+## Todo:
+* Add support directly on collections for dotPath .get and .set 
+(currently mixed support within Models.)
