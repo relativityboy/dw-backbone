@@ -5,8 +5,8 @@ var _         = require('underscore');
 
 describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into x.get('a').get('b').get/set('c')", function() {
 
-  describe(".set on Child Collections - speculative future functionality", function() {
-    var attributes, model, Model, ModelA, ModelB, CollectionA, cValue = "G", newValue = "Y", zValue = "H";
+  describe(".set on Child Collections - ", function() {
+    var aList, attributes, model, Model, ModelA, ModelB, CollectionA, cValue = "G", newValue = "Y", zValue = "H";
     before(function() {
 
       ModelB = Base.Model.extend({});
@@ -57,13 +57,99 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
         }
       };
       model = new Model(attributes);
+      aList = new CollectionA(attributes.aList);
     });
-    it("is a correct test model with collection",function(){
+    it("is a correct test model with collection & collection",function(){
       expect(model.get('aList').get('ll').get('m')).to.equal('p');
       expect(model.get('aList').get('z').get('m')).to.equal('f');
       expect(model.get('aList').at(1).get('m')).to.equal('f');
       expect(model.get('x').y.z).to.equal(zValue);
+
+
+      expect(aList.get('ll').get('m')).to.equal('p');
+      expect(aList.get('z').get('m')).to.equal('f');
+      expect(aList.at(1).get('m')).to.equal('f');
     });
+
+    it("can set a property on a model in a collection where id is a string", function(){
+      var updateValue1 = 'x', updateValue2 = 'apple';
+      //first degree dotPath (attribute on a model in a collection)
+      expect(aList.get('ll').get('m')).to.equal('p');
+      aList.setOn('ll.m', updateValue1);
+
+      expect(aList.get('ll').get('m')).to.equal(updateValue1);
+
+      //second degree dotPath (attribute on a model's child model in a collection)
+      expect(aList.get('ll').get('b').get('c')).to.equal(2);
+      aList.setOn('ll.b.c', updateValue2);
+      expect(aList.get('ll').get('m')).to.equal(updateValue1);
+      expect(aList.get('ll').get('b').get('c')).to.equal(updateValue2);
+
+      //make sure the above don't set attributes on the other models.
+      expect(aList.get(5).toJSON()).to.deep.equal(attributes.aList[0]);
+      expect(aList.get('z').toJSON()).to.deep.equal(attributes.aList[1]);
+    })
+    it("can set a property on a model in a collection where id is a number", function(){
+      var updateValue1 = 'x';
+      expect(aList.get(5).get('m')).to.equal('4');
+      aList.setOn('5.m', updateValue1);
+      expect(aList.get(5).get('m')).to.equal(updateValue1);
+    });
+    it("can set a property on a model in a collection by order-index", function(){
+      var updateValue1 = 'x';
+      expect(aList.at(1).get('m')).to.equal('f');
+      aList.setOn('[1].m', updateValue1);
+      expect(aList.at(1).get('m')).to.equal(updateValue1);
+
+      //make sure the above don't set attributes on the other models.
+      expect(aList.at(0).toJSON()).to.deep.equal(attributes.aList[0]);
+      expect(aList.at(2).toJSON()).to.deep.equal(attributes.aList[2]);
+    });
+    it("can set a property on all models in a collection using [*]", function(){
+      var updateValue1 = 'x';
+      //test all models for their own values
+      expect(aList.at(0).toJSON()).to.deep.equal(attributes.aList[0]);
+      expect(aList.at(1).toJSON()).to.deep.equal(attributes.aList[1]);
+      expect(aList.at(2).toJSON()).to.deep.equal(attributes.aList[2]);
+
+      aList.setOn('[*].m', updateValue1);
+
+      aList.each(function(mdl) {
+        expect(mdl.get('m')).to.equal(updateValue1);
+      });
+    });
+    it("can set a property on a child model of all models in a child collection using [*]", function(){
+      var updateValue1 = 'x';
+      //test all models for their own values
+      expect(aList.at(0).toJSON()).to.deep.equal(attributes.aList[0]);
+      expect(aList.at(1).toJSON()).to.deep.equal(attributes.aList[1]);
+      expect(aList.at(2).toJSON()).to.deep.equal(attributes.aList[2]);
+
+      aList.set('[*].b.c', updateValue1);
+
+      aList.each(function(mdl) {
+        expect(mdl.get('b').get('c')).to.equal(updateValue1);
+      });
+    });
+    it("can set multiple properties on a child model of all models in a child collection using [*]", function(){
+      var updateValue1 = 'x', updateValue2 = 'pp';
+      //test all models for their own values
+      expect(aList.at(0).toJSON()).to.deep.equal(attributes.aList[0]);
+      expect(aList.at(1).toJSON()).to.deep.equal(attributes.aList[1]);
+      expect(aList.at(2).toJSON()).to.deep.equal(attributes.aList[2]);
+
+      aList.setOn({
+        '[*].b.c': updateValue1,
+        '[*].m': updateValue2
+      });
+
+      aList.each(function(mdl) {
+        expect(mdl.get('b').get('c')).to.equal(updateValue1);
+        expect(mdl.get('m')).to.equal(updateValue2);
+      });
+    });
+
+    /////////////////////////////
     it("can set a property on a model in a child collection where id is a string", function(){
       var updateValue1 = 'x', updateValue2 = 'apple';
       //first degree dotPath (attribute on a model in a collection)
@@ -124,13 +210,12 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
         expect(mdl.get('b').get('c')).to.equal(updateValue1);
       });
     });
-    it("throws an error when attempting to set property directly on a collection", function(){
+    it("throws an error when attempting to set a primitive value as a model directly in a collection", function(){
       assert.throws(function() { model.set('aList.m', 'x');}, Error);
-
     });
   });
 
-  describe(".get on child Collections - speculative future functionality", function() {
+  describe(".get on child Collections - ", function() {
 
     var attributes, model, Model, ModelA, ModelB, CollectionA, cValue = "G", newValue = "Y", zValue = "H";
     before(function() {

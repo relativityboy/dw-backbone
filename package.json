@@ -1,6 +1,6 @@
 {
   "name": "dw-backbone",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "",
   "main": "src/base.js",
   "scripts": {

@@ -499,28 +499,10 @@ define([
         for(atrName in dotAttrs) if(dotAttrs.hasOwnProperty(atrName)) {
           if(this.attributes[atrName] instanceof Backbone.Model) {
             this.attributes[atrName].set(dotAttrs[atrName]);
-          } else if(this.attributes[atrName] instanceof Backbone.Collection) {
-            _.each(dotAttrs[atrName], function(val, dotAtrName) {
-              var dotAtrNameSuffix = dotAtrName.split('.'),
-                getterExpr = dotAtrNameSuffix.shift(),
-                attrs = {};
-              attrs[dotAtrNameSuffix.join('.')] = val;
-              if(dotAtrNameSuffix.length < 1) {
-                throw new Error('Attempting to use dotPath notation to set a property directly on a Collection. (' + dotAtrName + '). This is not supported. (Did you forget the .<id>. or .[index].)?');
-              }
-              if(0 === getterExpr.indexOf('[')) {
-                getterExpr = getterExpr.replace('[','').replace(']','');
-                if('*' === getterExpr) {
-                  this.setOnAll(attrs);
-                } else {
-                  this.at(parseInt(getterExpr)).set(attrs);
-                }
-              } else {
-                this.get(getterExpr).set(attrs);
-              }
-            }, this.attributes[atrName]);
+          } else if(this.attributes[atrName] instanceof _exports.Collection) {
+            this.attributes[atrName].setOn(dotAttrs[atrName]);
           } else {
-            throw new Error('Error attempting to use dot notation to set property on non Backbone.Model/Backbone.Collection (could be property has not been instantiated');
+            throw new Error('Error attempting to use dot notation to set property on non Backbone.Model/DWBackbone.Collection (could be property has not been instantiated');
           }
         }
       }
@@ -594,7 +576,7 @@ define([
             } else if (typeof map.attrs[key].fn === 'function') {
               rsp[rspAttrName] = map.attrs[key].fn.call(this, rsp[rspAttrName]);
             } else {
-              throw new Error('When attempting toJSON map.attrs.<key>.fn was not a valid value');
+              throw new Error('When attempting toJSON(' + mode + ') map.attrs.' + key + '.fn was not a valid value');
             }
           }
         }
@@ -722,6 +704,45 @@ define([
       }
 
       return Backbone.Collection.prototype.get.call(this, idi);
+    },
+    set:function() {
+      if(typeof arguments[0] === 'string') {
+        return this.setOn(arguments[0], arguments[1]);
+      }
+      return Backbone.Collection.prototype.set.apply(this, arguments);
+    },
+    setOn:function() {
+      var args = arguments[0], i;
+      if(typeof arguments[0] === 'string') {
+        args = {};
+        args[arguments[0]] = arguments[1];
+      }
+      _.each(args, function(val, dotAtrName) {
+        var dotAtrNameSuffix = dotAtrName.split('.'),
+          getterExpr = dotAtrNameSuffix.shift(),
+          attrs;
+        if(dotAtrNameSuffix.length < 1) {
+          attrs = val;
+          if(typeof attrs !== 'object' || attrs instanceof Array) {
+            throw new Error('Attempting to use dotPath notation to set a property directly on a Collection. (' + dotAtrName + '). This is not supported. (Did you forget the .<id>. or .[index].)?');
+          }
+        } else {
+          attrs = {};
+          attrs[dotAtrNameSuffix.join('.')] = val;
+        };
+
+        if(0 === getterExpr.indexOf('[')) {
+          getterExpr = getterExpr.replace('[','').replace(']','');
+          if('*' === getterExpr) {
+            return this.setOnAll(attrs);
+          } else {
+            this.at(parseInt(getterExpr)).set(attrs);
+          }
+        } else {
+          this.get(getterExpr).set(attrs);
+        }
+      }, this);
+      return this;
     }
   });
   return _exports;
