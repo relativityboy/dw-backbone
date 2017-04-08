@@ -191,10 +191,8 @@ model.get('m.c.f.g') == 'h' //true - Last attribute can be Backbone.Model
 
 **.set()** - accepts dotpath notation.
 
-It's worth noting all parts of the path (except the last) must already exist 
-
-
-_BELOW THIS LINE README COULD USE A LITTLE WORK_
+Use it like .get, or set multiple attributes using an object with dotPathed property names.
+_*All parts of the path (except the last) must already exist._
 
 ---
 Collection
