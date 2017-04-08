@@ -203,10 +203,40 @@ _extending .Collection adds the following functionality_
 
 **.get()** - accepts dotpath notation.
 ```javascript
-collection = new DWBackbone.Collection([{id:'x', name:'Foo'}, {id:'y', name:'Bar'}, {id:'z', name:'Nasty'}]);
+collection = new DWBackbone.Collection([{id:'x', name:'Foo'}, {id:'y', name:'Bar'}, {id:'z', name:'Nasty'}])
 
 collection.get('[1]') === collection.at(1) //true - 
 collection.get('z.name') == collection.get('z').get('name') //true
+```
+
+**.set('dotpath', val)** - accepts dotpath notation if first argument is a string, default Backbone.Collection behavior otherwise
+```javascript
+collection = new DWBackbone.Collection([{id:'x', name:'Foo'}, {id:'y', name:'Bar'}, {id:'z', name:'Nasty'}])
+
+collection.set('x.apple','Granny Smith')
+collection.get('x').get('apple'); //'Granny Smith' (you could also use a dotPath to get it, but this is less unambiguous.
+
+collection.set('[2].name', 'Not nasty')
+collection.at(2).get('name') //'Not nasty'
+
+collection.set('[*].bicycles','Are good')
+collection.at(0).get('bicycles') //'Are good'
+collection.get('[1].bicycles') //'Are good'
+collection.get('z.bicycles') //'Are good'
+collection.pluck('bicycles') //['Are good'] - because Backbone.Collection.pluck returns unique values
+```
+
+**.setOn()** - accepts dotpath noted objects
+```javascript
+collection = new DWBackbone.Collection([{id:'x', name:'Foo'}, {id:'y', name:'Bar'}, {id:'z', name:'Nasty'}])
+
+//the following call does all of the .set calls in the previous example
+collection.setOn({
+  'x.apple':'Granny Smith',
+  '[2].name':'Not nasty',
+  '[*].bicycles':'Are good'
+})
+
 ```
 
 **.toJSON()** - supports DWBackbone.Model.toJSON modes
@@ -217,12 +247,21 @@ Convenience
 _functions directly off DWBackbone_
 
 **.isA(item, [type])** - used it like typeof, but also returns 'array', 'date', 'NaN', or true/false if type is passed in 
+```javascript
+DWBackbone.isA([]) //'array'
+DWBackbone.isA((1/'apple')) //'NaN'
+
+DWBackbone.isA([], 'array') //true
+DWBackbone.isA('some string', 'array') //false
+DWBackbone.isA((1/'apple', 'NaN')) //true
+
+```
 
 **.logicallyIdentical({ object 1 },{ object 2 }, [{ ignoreTree }])** - are these two objects basically the same thing? Supports deep structures. Supports excluding specific attributes from the comparison.
 
-**.toUnderscored({ some object })** - converts a camelCased string to an underscored one. Pass in an object to convert all it's keys.
+**.toUnderscored({ some object })** - converts a camelCased string to an underscored one. Pass in an object to convert all its keys without modifying the values.
 
-**.toCamel({ some object })** - converts an underscored string to a camelCased one. Pass in an object to convert all it's keys.
+**.toCamel({ some object })** - converts an underscored string to a camelCased one. Pass in an object to convert all its keys without modifying the values.
 
 **.setLogger(function() )** - Pass in any logging function you like *_as of 0.5 DWBackbone does not write directly to console.log_
 
