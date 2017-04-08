@@ -186,17 +186,27 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
     });
 
     it("can get a property from a model in a child collection where id is a string", function(){
-      expect(model.get('aList.z.m')).to.equal('f');
+      expect(model.get('aList').get('z.m')).to.equal('f');
     });
     it("can get a property from a model in a child collection where id is a number", function(){
-      expect(model.get('aList.5.m')).to.equal('4');
+      expect(model.get('aList').get('5.m')).to.equal('4');
     });
     it("can get a property from a model in a child collection by order-index", function(){
+      expect(model.get('aList').get('[0].m')).to.equal('4');
+    });
+
+    it("Model Parent - can get a property from a model in a child collection where id is a string", function(){
+      expect(model.get('aList.z.m')).to.equal('f');
+    });
+    it("Model Parent - can get a property from a model in a child collection where id is a number", function(){
+      expect(model.get('aList.5.m')).to.equal('4');
+    });
+    it("Model Parent - can get a property from a model in a child collection by order-index", function(){
       expect(model.get('aList.[0].m')).to.equal('4');
     });
-    it("can get a property from all models in a child collection using [*]", function(){
+    it("can not get a property from all models in a child collection using [*]", function(){
       assert.throws(function() { model.get('aList.[*].m');}, Error);
-      // When dotPath wildcard notation is implemented,
+      // If dotPath wildcard notation is implemented,
       // expect(JSON.stringify(model.get('aList.[*].m')) ).to.deep.equal(JSON.stringify(['4','f','p']) );
     });
   });
