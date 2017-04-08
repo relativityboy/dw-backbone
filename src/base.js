@@ -312,14 +312,17 @@ define([
           options = {mode:options};
           break;
         case 'undefined' :
-          options = {mode:false};
+          options = {};
+          if(this.jsonMaps && this.jsonMaps.hasOwnProperty('_') && this.jsonMaps._.hasOwnProperty('from')) {
+            options.mode = '_';
+          }
       }
-      if(this.jsonMaps.hasOwnProperty(options.mode)) {
+
+      if(options.mode) {
         attributes = this.fromJSON(attributes, options.mode);
       }
       arguments[0] = attributes;
       Backbone.Model.apply(this, arguments);
-
     },
     /**
      * Compares the attributes of this model with another model, or json in the same structure.
@@ -586,38 +589,33 @@ define([
     },
 
     fromJSON:function(data, mode) {
-      var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = function(val) { return val};;
-      if(!mode && this.jsonMaps.hasOwnProperty('_') && this.jsonMaps._.hasOwnProperty('from')) {
-        mode = '_';
+      var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = function(val) { return val};
+
+      map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false;
+      if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
+        throw new Error('fromJSON mode:' + mode + ' does not have a map (jsonMaps.' + mode + '.from) for all models in the tree being Jsonified');
       }
-      if(mode) {
-        map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false;
-        if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
-          throw new Error('fromJSON mode:' + mode + ' does not have a map (jsonMaps.' + mode + '.from) for all models in the tree being Jsonified');
-        }
-        map.inputs = (map.hasOwnProperty('inputs')) ? map.inputs : {};
+      map.inputs = (map.hasOwnProperty('inputs')) ? map.inputs : {};
 
-        if (map.include) {
-          keys = map.include;
-        } else if (map.exclude) {
-          keys = [];
-          for (var key in data) if (data.hasOwnProperty(key)) {
-            if (map.exclude.indexOf(key) == -1) {
-              keys.push(key)
-            }
+      if (map.include) {
+        keys = map.include;
+      } else if (map.exclude) {
+        keys = [];
+        for (var key in data) if (data.hasOwnProperty(key)) {
+          if (map.exclude.indexOf(key) == -1) {
+            keys.push(key)
           }
-        } else {
-          keys = _.keys(data);
-        }
-
-        if (map.convert === 'toCamel') {
-          converter = toCamel;
-        } else if (map.convert == 'toUnderscored') {
-          converter = toUnderscored;
         }
       } else {
         keys = _.keys(data);
       }
+
+      if (map.convert === 'toCamel') {
+        converter = toCamel;
+      } else if (map.convert == 'toUnderscored') {
+        converter = toUnderscored;
+      }
+
       _.each(keys, function(key) {
         rspAttrName = (map.inputs[key] && map.inputs[key].attrName) ? map.inputs[key].attrName : converter(key);
         rsp[rspAttrName] = (typeof data[key] === 'object')? converter(data[key]) : data[key];

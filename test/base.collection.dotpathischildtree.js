@@ -148,6 +148,9 @@ describe("Base.Model.dotPathIsChildTree=true - transform x.get/set('a.b.c') into
         expect(mdl.get('m')).to.equal(updateValue2);
       });
     });
+    it("throws an error when attempting to set an array as a model",function() {
+      assert.throws(function() { aList.setOn('m', []);}, Error);
+    })
 
     /////////////////////////////
     it("can set a property on a model in a child collection where id is a string", function(){

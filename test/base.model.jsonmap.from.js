@@ -1,5 +1,6 @@
 var Base      = require('../src/base');
 var expect    = require("chai").expect;
+var assert    = require("chai").assert;
 var _         = require('underscore');
 
 describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Model({...}, <mode>)'", function() {
@@ -15,7 +16,16 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
           },
           camelC:{
             from:{
-              convert:'toCamel'
+              convert:'toCamel',
+            }
+          },
+          badFn:{
+            from:{
+              inputs:{
+                c:{
+                  fn:'zorp'
+                }
+              }
             }
           }
         }
@@ -42,6 +52,16 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
     it("= 'toCamel' converts under_scored arguments to camelCase",function(){
       model = new Model(attributes, 'camelC');
       expect(model.attributes.hasOwnProperty('objectTwo')).to.equal(true);
+    });
+    it("throws an error on undefined mode",function() {
+      assert.throws(function() {
+        new Model(attributes, 'xx');
+        }, Error);
+    });
+    it("throws an error on incorrect fn",function() {
+      assert.throws(function() {
+        new Model(attributes, 'badFn');
+        }, Error);
     });
   });
   describe(".exclude", function() {
@@ -195,7 +215,42 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
       expect(model).to.equal(thisModel);
     });
   });
-  describe("jsonMap._.from automatically used if present and no mode is passed to the constructor", function() {
-    it("stub", function(){})
+  describe("jsonMap._.from", function() {
+    var attributes, model, Model;
+    before(function() {
+      Model = Base.Model.extend({
+        jsonMaps:{
+          _:{
+            from:{
+              inputs:{
+                objectOne:{
+                  attrName:'goober'
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+    beforeEach(function() {
+      attributes = {
+        b:1,
+        c:'apple',
+        objectOne:{
+          'pear':'fruit',
+          'banana':'more fruit'
+        },
+        object_two:{
+          'pear':'glim',
+          'banana':'grom'
+        },
+        jsonString1:'{"a":1,"gross":"hot dog"}'
+      };
+
+      model = new Model(attributes);
+    });
+    it("automatically used if present and no mode is passed to the constructor", function(){
+      expect(model.get('goober')).to.equal(attributes.objectOne);
+    });
   });
 });
