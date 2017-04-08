@@ -1,6 +1,6 @@
 {
   "name": "dw-backbone",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "",
   "main": "src/base.js",
   "scripts": {
@@ -15,10 +15,8 @@
     "url": "https://github.com/relativityboy/dw-backbone.git"
   },
   "dependencies": {
-    "amdefine": "^1.0.0",
     "backbone": "^1.3.3",
     "chai": "^3.5.0",
-    "istanbul": "^0.4.5",
     "underscore": "^1.8.3"
   },
   "devDependencies": {

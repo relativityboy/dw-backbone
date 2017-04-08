@@ -13,6 +13,8 @@ and your successors.
 
 dw-backbone was created with these problems in mind.
 
+_*This lib is provided uniminified, because that's either a part of your build process already, or you're like "source-map what?"_
+
 ### Exports Model, Collection, and convenience! 
 
 ---

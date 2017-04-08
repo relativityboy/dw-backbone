@@ -1,15 +1,12 @@
-//todo: need to create the constructor function, and then create the new 'set' functionality.
-
-if (typeof define !== 'function') {
-  var define = require('amdefine')(module);
-}
-define([
-  'underscore',
-  'backbone'
-], function(
-  _,
-  Backbone
-) {
+(function (root, factory) {
+  if(typeof define === 'function' && define.amd) {
+    define(['underscore', 'backbone'], factory);
+  } else if(typeof module === 'object' && module.exports) {
+    module.exports = factory(require('underscore'), require('backbone'));
+  } else {
+    root.DWBackbone = factory(root._, root.Backbone);
+  }
+}(this, function(_, Backbone) {
   var fnLog = function() {},
     _exports = {
       setLogger:function(fn) {
@@ -30,8 +27,6 @@ define([
     toJSONString,
     cleanObject,
     logicallyIdentical;
-
-  // _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
   //SUPPORT FUNCTIONS & VARIABLES
 
@@ -760,6 +755,5 @@ define([
     }
   });
 
-
   return _exports;
-});
+}));
