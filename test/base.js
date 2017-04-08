@@ -495,6 +495,33 @@ describe('Base', function() {
         expect(typeof Base.toUnderscoredJSONString).to.equal('function');
       });
     });
+    describe(".setLooger & .getLogger", function() {
+      it("sets and gets", function() {
+        var fn = function(){};
+        Base.setLogger(fn);
+        expect(Base.getLogger() === fn).to.be.true;
+      });
+      it("call the passed in function on log events", function() {
+        var logs = [],
+          fn = function(msg){
+            logs.push(msg);
+          },
+          model;
+
+        Base.setLogger(fn);
+        var Model = Base.Model.extend({
+          _setCollections:{
+            a:Base.Collection
+          }
+        });
+
+        model = new Model({a:[{b:'c'}]});
+
+        model.set('a', new Base.Collection([{b:'e'}]));
+
+        expect(logs.length).to.equal(1);
+      });
+    });
   });
 });
 

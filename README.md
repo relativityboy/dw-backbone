@@ -38,8 +38,14 @@ Model = DWBackbone.Model.extend({
         //'include':['atributeName'] - A whitelist. Only these will be used to hydrate the model
         //'exclude:[] - A blacklist. These items will not be used to hydrate the model
       },
-      'to':{ //supports everything 'from' does, and is used with .toJSON calls.
-        'convert':'toUnderscored'
+      'to':{  //is used with .toJSON calls. only difference between it 
+              // and .from is 'inputs' is called 'attrs'
+        'convert':'toUnderscored',
+        'attrs':{
+          'a_bc':{
+            fn:'stringify'
+           }
+        } 
       }
     }
   }
@@ -81,7 +87,9 @@ Also runs after the transforms on **new Model**
 Model = DWBackbone.Model.extend({
   _set:{    
     x:DWBackbone.Model, //define a Model and JSON will be hydrated to that model.
-    y:function(val) { //define a function for attribute \<attrName\> and calls to .set('\<attrName\>') will first pass the value to your function for modification                            
+    y:function(val) { //define a function for attribute \<attrName\> and 
+                      // calls to .set('\<attrName\>') will first pass the value 
+                      // to your function for modification                            
       return val.toUpperCase(); 
     }
   }
@@ -112,7 +120,8 @@ model.get('x') === child //false
 model.set('x', child);
 model.get('x') === child //true
 
-//Listens for 'destroy' events and removes all listeners and removes the model from .attributes. (un-binds on unset)
+//Listens for 'destroy' events and removes all listeners and removes the model 
+//from .attributes. (un-binds on unset)
 child.destroy();
 model.get('x') //undefined
 ````
@@ -213,6 +222,9 @@ _functions directly off DWBackbone_
 
 **.toCamel({ some object })** - converts an underscored string to a camelCased one. Pass in an object to convert all it's keys.
 
+**.setLogger(function() )** - Pass in any logging function you like *_as of 0.5 DWBackbone does not write directly to console.log_
+
+**.getLogger()** - because setLogger was lonely
 
 [npm-image]: http://img.shields.io/npm/v/dw-backbone.svg
 [npm-url]: https://www.npmjs.com/package/dw-backbone

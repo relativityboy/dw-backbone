@@ -195,17 +195,6 @@ describe('Base.Model', function() {
       model.set('collection', ["grom", {id:2, 'boo':3}]);
       expect(model.get('collection').length).to.equal(2);
     });
-    it("LEGACY: uses _setSpecial function if declared", function() {
-      model._setSpecial = function(attrs) {
-        attrs.abc = 5;
-        return attrs;
-      };
-      model.set({});
-      expect(model.get('abc')).to.equal(5);
-
-    });
-
-
     it("manages self created collection as defined by _setCollection", function() {
       var model = new Model2({collection:[{id:2, 'boo':3}]}),
         collection = new Collection([{id:7, 'boo':8}]);

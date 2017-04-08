@@ -10,7 +10,18 @@ define([
   _,
   Backbone
 ) {
-  var _exports = {},
+  var fnLog = function() {},
+    _exports = {
+      setLogger:function(fn) {
+        if(typeof fn !== 'function') {
+          throw new Error('Logger must be a function');
+        }
+        fnLog = fn;
+      },
+      getLogger:function() {
+        return fnLog;
+      }
+    },
     Model,
     Collection,
     isA,
@@ -392,15 +403,6 @@ define([
       return Backbone.Model.prototype.get.call(this, attrName);
     },
 
-    /**
-     * this can be over-ridden by extending classes
-     * @param attrs
-     * @param options
-     * @returns {*}
-     * @private
-     */
-    //_setSpecial:_setSpecial,
-
     set: function (key, val, options) {
       var atrName, attrs, newAttr, oldAttr, dotAttrs = false, dotAtrName, dotAtrNameSuffix;
 
@@ -455,7 +457,7 @@ define([
           }
 
           if(newAttr.constructor === this._setCollections[atrName]) {
-            console.log('warning: attempting to set backbone collection as attribute:' + atrName + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
+            fnLog('warning: attempting to set backbone collection as attribute:' + atrName + ' this attribute maintains it\'s own internal collection. Using .models array & discarding collection');
             newAttr = _.clone(attrs[atrName].models); //we don't want the original collection's array, just its contents.
           }
           if(this._set.hasOwnProperty(atrName)) {
@@ -489,15 +491,10 @@ define([
         }
       }
 
-      //5. handle legacy and attribute combination behaviors by extending classes - deprecated behavior!
-      if(this._setSpecial) {
-        attrs = this._setSpecial(attrs, options);
-      }
-
-      //6. Punt to the standard Model#set for default Backbone behaviors - we have not set dot.path attributes yet.
+      //5. Punt to the standard Model#set for default Backbone behaviors - we have not set dot.path attributes yet.
       Backbone.Model.prototype.set.call(this, attrs, options);
 
-      //7. Set dot.path attributes last (because classic behaviors should come first!)
+      //6. Set dot.path attributes last (because classic behaviors should come first!)
       if(this.dotPathIsChildTree) {
         for(atrName in dotAttrs) if(dotAttrs.hasOwnProperty(atrName)) {
           if(this.attributes[atrName] instanceof Backbone.Model) {
@@ -510,7 +507,7 @@ define([
         }
       }
 
-      //8. Return self, as per classic Backbone behavior
+      //7. Return self
       return this;
     },
     /**
@@ -526,6 +523,23 @@ define([
         delete this.parentModel
       }
     },
+    /**
+     * Where the to & from json maps go.
+     * mode:{
+     *  to:{
+     *    convert:'toCamel' | 'toUnderscored'
+     *    inputs:{
+     *      <attributeName>:{
+     *        fn:'stringify' | 'parse' | function(attrValue) {return (transformed attribute value) }
+     *        attrName:'<output attribute name>'
+     *      }
+     *    }
+     *  },
+     *  from:{
+     *    //structure is the same as to
+     *  }
+     * }
+     */
     jsonMaps:{},
     toJSON:function(options, mode) {
 
@@ -536,11 +550,13 @@ define([
       mode = (mode)? mode : '_';
 
       if((mode !== '_') || (mode === '_' && this.jsonMaps.hasOwnProperty('_') && this.jsonMaps._.hasOwnProperty('to'))) {
-        map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false; //['to' + mode + 'JSONMap'];
-        map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
+        map = (this.jsonMaps[mode] && this.jsonMaps[mode].to) ? this.jsonMaps[mode].to : false;
+
         if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
           throw new Error('toJSON mode:' + mode + ' does not have a map (jsonMaps.' + mode + '.to) for all models in the tree being Jsonified');
         }
+
+        map.attrs = (map.hasOwnProperty('attrs')) ? map.attrs : {};
 
         if (map.include) {
           keys = map.include;
@@ -560,7 +576,7 @@ define([
           } else if (map.convert == 'toUnderscored') {
             converter = toUnderscored;
           } else {
-            console.log('warning: invalid attribute name converter "' + map.convert + '" specified')
+            fnLog('warning: invalid attribute name converter "' + map.convert + '" specified')
           }
         }
 
@@ -635,8 +651,8 @@ define([
 
       return rsp;
     }
-
   });
+
 
   //ROOT COLLECTION
   Collection = _exports.Collection = Backbone.Collection.extend({
@@ -743,5 +759,7 @@ define([
       return this;
     }
   });
+
+
   return _exports;
 });
