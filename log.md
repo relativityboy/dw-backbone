@@ -1,6 +1,6 @@
 ## Log:
 ###2017.04
-* Some support for dotPath on collections.
+* Full support for dotPath on collections.
 
 ###2017.03
 * More tests (now above 90%)
