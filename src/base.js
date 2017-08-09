@@ -378,7 +378,7 @@
         }
       };
     },
-    
+
     get:function (attrName) {
       var atr;
       if(this.dotPathIsChildTree && typeof attrName === 'string') {
@@ -601,8 +601,8 @@
 
     fromJSON:function(data, mode) {
       var keys, map = {inputs:{}}, rsp = {}, rspAttrName, converter = function(val) { return val};
-
       map = (this.jsonMaps[mode] && this.jsonMaps[mode].from) ? this.jsonMaps[mode].from : false;
+
       if (!map) { //we want to be pretty strict here. All objects in the tree must know they're going to be called within a particular context.
         throw new Error('fromJSON mode:' + mode + ' does not have a map (jsonMaps.' + mode + '.from) for all models in the tree being Jsonified');
       }
@@ -648,16 +648,35 @@
     }
   });
 
+  var fnOptions = function(Model, options) {
+    var opts = ('object' === typeof options)? _.clone(options) : {};
+
+    mode = (typeof options === 'string')? options : (typeof options === 'object' && options.mode)? options.mode : false;
+    if(!mode) {
+      if(Model.prototype.jsonMaps && Model.prototype.jsonMaps.hasOwnProperty('_') && Model.prototype.jsonMaps._.hasOwnProperty('from')) {
+        mode = '_';
+      }
+    }
+    if(mode) {
+      opts.mode = mode;
+    }
+    return opts;
+  }
+
 
   //ROOT COLLECTION
   Collection = _exports.Collection = Backbone.Collection.extend({
     model:Model,
     dotPathIsChildTree:true,
-    constructor:function(json, options) {
-      if(typeof options === 'string') {
-        arguments[1] = {mode: options};
+    constructor:function(data, options) {
+      if (data) {
+        Backbone.Collection.call(this, data, fnOptions(this.model, options));
+      } else {
+        Backbone.Collection.apply(this, arguments);
       }
-      Backbone.Collection.apply(this, arguments);
+    },
+    reset:function(data, options) {
+      Backbone.Collection.prototype.reset.call(this, data, fnOptions(this.model, options));
     },
     toJSON:function(options, mode) {
       var i, model, rsp = [];
@@ -686,6 +705,7 @@
       });
       return this;
     },
+
     /**
      *
      * @param idi - ID or Index.
@@ -718,7 +738,7 @@
       if(typeof arguments[0] === 'string') {
         return this.setOn(arguments[0], arguments[1]);
       }
-      return Backbone.Collection.prototype.set.apply(this, arguments);
+      return Backbone.Collection.prototype.set.call(this, arguments[0], fnOptions(this.model, arguments[1]));
     },
     setOn:function() {
       var args = arguments[0], i;
