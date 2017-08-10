@@ -5,3 +5,4 @@ log.md
 node_modules
 coverage
 .nyc_output
+.DS_Store

@@ -9,7 +9,7 @@ describe('Base.Collection', function() {
   var Model, Collection, collection, errMap, keyMap, modelsJSON, modelJSON, counter, undef;
   before(function() {
     Model = Base.Model.extend({
-      jsonMaps:{
+      /*jsonMaps:{
         api:{
           from:{
             convert:'toCamel'
@@ -18,7 +18,7 @@ describe('Base.Collection', function() {
             convert:'toUnderscored'
           }
         }
-      },
+      },*/
       incCounter:function() {
       counter++;
     }
@@ -31,7 +31,7 @@ describe('Base.Collection', function() {
   beforeEach(function() {
     counter = 0;
     errMap = [];
-    keyMap = {'firstName':'first_name', 'lastName':'last_name', 'address':'address', 'city':'city'};
+    //keyMap = {'firstName':'first_name', 'lastName':'last_name', 'address':'address', 'city':'city'};
     modelsJSON = [
       {
         first_name:'George',
@@ -59,7 +59,7 @@ describe('Base.Collection', function() {
       address:'Staged Authenticity',
       city:'Tree Town'
     }
-    collection = new Collection(modelsJSON, 'api')
+    collection = new Collection(modelsJSON)
   });
   it("exists", function() {
     expect(typeof Base.Collection).to.equal('function')
@@ -68,7 +68,7 @@ describe('Base.Collection', function() {
     collection = new Base.Collection();
     expect(typeof collection).to.equal('object')
   });
-  it("supports jsonMap Model constructor modes", function() {
+  /*it("supports jsonMap Model constructor modes", function() {
     collection.each(function(model, i) {
       _.each(keyMap, function(val, key) {
         if(!model.attributes.hasOwnProperty(key)) {
@@ -86,18 +86,18 @@ describe('Base.Collection', function() {
         }
       });
     });
-  });
-  it(".setOnAll supports jsonMap Model toJSON modes", function() {
+  });*/
+  it(".setOnAll sets value on all models in collection", function() {
     collection.setOnAll('planet', 'earth');
     collection.each(function(model, i) {
       expect('earth').to.equal(model.attributes.planet);
     });
   });
-  it(".callOnAll supports jsonMap Model toJSON modes", function() {
+  it(".callOnAll calls function on all models in collection", function() {
     collection.callOnAll('incCounter');
     expect(counter).to.equal(3)
   });
-  it(".unsetOnAll supports jsonMap Model toJSON modes", function() {
+  it(".unsetOnAll unsets value on all models in collection", function() {
     collection.unsetOnAll('firstName');
     collection.each(function(model, i) {
       expect(model.get('firstName')).to.equal(undef);

@@ -1,3 +1,6 @@
 dw-backbone.iml
 /coverage
 .idea
+.DS_Store
+.nyc_output
+node_modules
