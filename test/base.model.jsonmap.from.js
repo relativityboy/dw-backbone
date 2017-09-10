@@ -37,7 +37,8 @@ describe("Base.Model.jsonMap.<mode>.from - transform input {...} on 'new Base.Mo
         c:'apple',
         objectOne:{
           'pear':'fruit',
-          'banana':'more fruit'
+          'banana':'more fruit',
+          'mango':null
         },
         object_two:{
           'pear':'glim',

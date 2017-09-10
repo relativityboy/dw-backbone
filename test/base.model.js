@@ -268,7 +268,8 @@ describe('Base.Model', function() {
         c:'apple',
         object:{
           'pear':'fruit',
-          'banana':'more fruit'
+          'banana':'more fruit',
+          'mango':null
         }
       };
       model = new Model(attributes);

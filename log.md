@@ -1,7 +1,8 @@
 ## Log:
+###2017.09
+* .toJSON - added support for null value attributes. :(
 ###2017.04
 * Full support for dotPath on collections.
-
 ###2017.03
 * More tests (now above 90%)
 * Added support for dotPath to Models.

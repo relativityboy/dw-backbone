@@ -581,11 +581,14 @@
       _.each(keys, function(key) {
         if(typeof this.attributes[key] !== 'undefined') {
           rspAttrName = (map.attrs[key] && map.attrs[key].fieldName) ? map.attrs[key].fieldName : converter(key);
-          rsp[rspAttrName] = (typeof this.attributes[key].toJSON === 'function') ? this.attributes[key].toJSON(options, mode) : (typeof this.attributes[key] === 'object') ? converter(this.attributes[key]) : this.attributes[key];
+
+          rsp[rspAttrName] = (('object' !== typeof this.attributes[key]) || (null === this.attributes[key]))? this.attributes[key] :
+            ('function' === typeof this.attributes[key].toJSON) ? this.attributes[key].toJSON(options, mode) : converter(this.attributes[key]);
+
           if (map.attrs[key] && map.attrs[key].fn) {
-            if (map.attrs[key].fn == 'stringify') {
+            if (map.attrs[key].fn === 'stringify') {
               rsp[rspAttrName] = JSON.stringify(rsp[rspAttrName]);
-            } else if (map.attrs[key].fn == 'parse') {
+            } else if (map.attrs[key].fn === 'parse') {
               rsp[rspAttrName] = JSON.parse(rsp[rspAttrName]);
             } else if (typeof map.attrs[key].fn === 'function') {
               rsp[rspAttrName] = map.attrs[key].fn.call(this, rsp[rspAttrName]);
